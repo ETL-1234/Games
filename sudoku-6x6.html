@@ -161,8 +161,8 @@ async function loadGames() {
     `${SUPABASE_URL}/rest/v1/GamesSudoku?grid_size=eq.6&order=created_at.desc`,
     {
       headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`
       }
     }
   );
