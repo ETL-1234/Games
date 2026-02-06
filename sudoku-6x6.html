@@ -197,28 +197,6 @@ const gridEl = document.getElementById("grid");
 const paletteEl = document.getElementById("palette");
 const overlay = document.getElementById("overlayText");
 
-/* 🔹 ADD THIS FUNCTION RIGHT HERE 🔹 */
-async function fetchGameTitle() {
-  const SUPABASE_URL = "https://YOUR_PROJECT_ID.supabase.co";
-  const SUPABASE_KEY = "YOUR_PUBLIC_ANON_KEY";
-
-  const response = await fetch(
-    `${SUPABASE_URL}/rest/v1/GamesSudoku?Type=eq.6x6&Active=eq.true&order=StartDate.desc&limit=1`,
-    {
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${SUPABASE_KEY}`,
-      },
-    }
-  );
-
-  const data = await response.json();
-
-  if (data && data.length > 0) {
-    document.getElementById("gameTitle").textContent = data[0].Name;
-  }
-}
-
 function buildGrid() {
   gridEl.innerHTML = "";
   puzzle.forEach((row, r) => {
