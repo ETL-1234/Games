@@ -193,10 +193,7 @@ function initGame(index) {
  buildPalette();
  updateDots();
 }
-const gridEl = document.getElementById("grid");
-const paletteEl = document.getElementById("palette");
-const overlay = document.getElementById("overlayText");
-
+  
 function buildGrid() {
   gridEl.innerHTML = "";
   puzzle.forEach((row, r) => {
