@@ -62,7 +62,7 @@ body {
   transition: transform 0.3s ease, filter 0.3s ease;
 }
 
-/* Match highlight */
+/* Match highlight animation */
 .cell.match img {
   transform: scale(1.4);
   filter: drop-shadow(0 0 15px gold);
@@ -84,7 +84,7 @@ const SUPABASE_ANON_KEY = "sb_publishable_VZiTsc0JGVx6tVf2Zu-9uQ_-FwjGpQW";
 let games = [], currentGame = null;
 let gridRows = 9, gridCols = 5, itemTypes = 5;
 let images = {}, gridData = [];
-let touchStartX=0, touchStartY=0, touchStartCell=null;
+let touchStartX = 0, touchStartY = 0, touchStartCell = null;
 const gridEl = document.getElementById("grid");
 const titleEl = document.getElementById("gameTitle");
 
@@ -105,8 +105,9 @@ function initGame(game){
   document.documentElement.style.setProperty('--bg-color', game.BgColor);
   document.documentElement.style.setProperty('--font-color', game.FontColor);
   titleEl.textContent=game.Name;
+
   buildEmptyGrid();
-  fillGridNoMatches(); // no starting matches
+  fillGridNoMatches(); // Ensure no starting matches
   renderGrid();
 }
 
@@ -120,7 +121,9 @@ function fillGridNoMatches(){
 }
 
 function fillGridRandomly(){
-  for(let r=0;r<gridRows;r++) for(let c=0;c<gridCols;c++) gridData[r][c]=randomItem();
+  for(let r=0;r<gridRows;r++) 
+    for(let c=0;c<gridCols;c++) 
+      gridData[r][c]=randomItem();
 }
 
 function randomItem(){ return Math.floor(Math.random()*itemTypes)+1; }
@@ -130,10 +133,12 @@ function renderGrid(){
   gridEl.innerHTML="";
   gridEl.style.gridTemplateColumns=`repeat(${gridCols},1fr)`;
   gridEl.style.gridTemplateRows=`repeat(${gridRows},1fr)`;
+  
   for(let r=0;r<gridRows;r++){
     for(let c=0;c<gridCols;c++){
       const cell=document.createElement("div");
-      cell.className="cell"; cell.dataset.row=r; cell.dataset.col=c;
+      cell.className="cell"; 
+      cell.dataset.row=r; cell.dataset.col=c;
       cell.addEventListener("touchstart",handleTouchStart,{passive:true});
       cell.addEventListener("touchend",handleTouchEnd,{passive:true});
       if(gridData[r][c]!==null){
@@ -171,25 +176,32 @@ function findMatches(){
 /* ================= ANIMATE MATCHES ================= */
 async function animateMatches(matches){
   if(matches.size===0) return;
-  // highlight
+
+  // Highlight matched images
   matches.forEach(key=>{
     const [r,c]=key.split(',').map(Number);
-    const cell=gridEl.querySelector(`.cell[data-row='${r}'][data-col='${c}']`);
+    const cell = gridEl.querySelector(`.cell[data-row='${r}'][data-col='${c}']`);
     if(cell && cell.firstChild) cell.firstChild.classList.add('match');
   });
-  // wait for CSS animation
+
+  // Wait for CSS animation to show
   await new Promise(res=>setTimeout(res,400));
-  // remove items
+
+  // Remove matched items from gridData and DOM
   matches.forEach(key=>{
     const [r,c]=key.split(',').map(Number);
     gridData[r][c]=null;
+    const cell = gridEl.querySelector(`.cell[data-row='${r}'][data-col='${c}']`);
+    if(cell && cell.firstChild) cell.removeChild(cell.firstChild);
   });
-  renderGrid();
+
+  // Apply gravity and refill
   applyGravity();
   refillGrid();
   renderGrid();
-  // check new matches recursively
-  const newMatches=findMatches();
+
+  // Check for new matches recursively
+  const newMatches = findMatches();
   if(newMatches.size>0) await animateMatches(newMatches);
 }
 
@@ -205,8 +217,11 @@ function applyGravity(){
     }
   }
 }
+
 function refillGrid(){
-  for(let r=0;r<gridRows;r++) for(let c=0;c<gridCols;c++) if(gridData[r][c]===null) gridData[r][c]=randomItem();
+  for(let r=0;r<gridRows;r++) 
+    for(let c=0;c<gridCols;c++) 
+      if(gridData[r][c]===null) gridData[r][c]=randomItem();
 }
 
 /* ================= TOUCH + SWAP ================= */
@@ -216,34 +231,42 @@ function handleTouchStart(e){
   touchStartX=touch.clientX; touchStartY=touch.clientY;
   touchStartCell={row:Number(cell.dataset.row), col:Number(cell.dataset.col)};
 }
+
 function handleTouchEnd(e){
   if(!touchStartCell) return;
   const touch=e.changedTouches[0];
   const dx=touch.clientX-touchStartX;
   const dy=touch.clientY-touchStartY;
-  if(Math.max(Math.abs(dx),Math.abs(dy))<20){ resetTouch(); return;}
+  if(Math.max(Math.abs(dx),Math.abs(dy))<20){ resetTouch(); return; }
+  
   let targetRow=touchStartCell.row;
   let targetCol=touchStartCell.col;
   if(Math.abs(dx)>Math.abs(dy)) targetCol+=dx>0?1:-1;
   else targetRow+=dy>0?1:-1;
+  
   attemptSwap(targetRow,targetCol);
   resetTouch();
 }
+
 async function attemptSwap(r2,c2){
   const r1=touchStartCell.row, c1=touchStartCell.col;
   if(r2<0||r2>=gridRows||c2<0||c2>=gridCols) return;
+
   swapCells(r1,c1,r2,c2);
   renderGrid();
+
   const matches=findMatches();
   if(matches.size>0) await animateMatches(matches);
-  else { swapCells(r1,c1,r2,c2); renderGrid();}
+  else { swapCells(r1,c1,r2,c2); renderGrid(); }
 }
+
 function swapCells(r1,c1,r2,c2){
   const temp=gridData[r1][c1]; gridData[r1][c1]=gridData[r2][c2]; gridData[r2][c2]=temp;
 }
+
 function resetTouch(){ touchStartCell=null; }
 
-/* ================= INIT GAME ================= */
+/* ================= INIT ================= */
 loadGames();
 </script>
 </body>
