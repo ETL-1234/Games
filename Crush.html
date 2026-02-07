@@ -196,11 +196,10 @@ function renderGrid() {
     });
   });
 }
-
-
 /* =======================
-   START
+   START (TOUCH + SWAP)
 ======================= */
+
 function handleTouchStart(e) {
   const touch = e.touches[0];
   const cell = e.currentTarget;
@@ -209,8 +208,8 @@ function handleTouchStart(e) {
   touchStartY = touch.clientY;
 
   touchStartCell = {
-    row: parseInt(cell.dataset.row),
-    col: parseInt(cell.dataset.col)
+    row: Number(cell.dataset.row),
+    col: Number(cell.dataset.col)
   };
 }
 
@@ -224,22 +223,27 @@ function handleTouchEnd(e) {
   const absX = Math.abs(dx);
   const absY = Math.abs(dy);
 
+  // Ignore tiny movements
+  if (Math.max(absX, absY) < 20) {
+    resetTouch();
+    return;
+  }
+
   let targetRow = touchStartCell.row;
   let targetCol = touchStartCell.col;
 
-  // Determine swipe direction
-  if (Math.max(absX, absY) < 20) {
-    resetTouch();
-    return; // too small, treat as tap
-  }
-
+  // Decide swipe direction
   if (absX > absY) {
     targetCol += dx > 0 ? 1 : -1;
   } else {
     targetRow += dy > 0 ? 1 : -1;
   }
 
-  function attemptSwapWithTarget(r2, c2) {
+  attemptSwapWithTarget(targetRow, targetCol);
+  resetTouch();
+}
+
+function attemptSwapWithTarget(r2, c2) {
   const r1 = touchStartCell.row;
   const c1 = touchStartCell.col;
 
@@ -253,39 +257,19 @@ function handleTouchEnd(e) {
   renderGrid();
 }
 
-  function swapCells(r1, c1, r2, c2) {
+function swapCells(r1, c1, r2, c2) {
   const temp = gridData[r1][c1];
   gridData[r1][c1] = gridData[r2][c2];
   gridData[r2][c2] = temp;
 }
 
-  function resetTouch() {
+function resetTouch() {
   touchStartCell = null;
-  touchEndCell = null;
 }
 
-  function attemptSwap() {
-  if (!touchStartCell || !touchEndCell) return;
-
-  const r1 = touchStartCell.row;
-  const c1 = touchStartCell.col;
-  const r2 = touchEndCell.row;
-  const c2 = touchEndCell.col;
-
-  const rowDiff = Math.abs(r1 - r2);
-  const colDiff = Math.abs(c1 - c2);
-
-  // Only allow adjacent swaps
-  if (rowDiff + colDiff !== 1) {
-    resetTouch();
-    return;
-  }
-
-  swapCells(r1, c1, r2, c2);
-  renderGrid();
-
-  resetTouch();
-}
+/* =======================
+   INIT
+======================= */
 
   loadGames();
 </script>
