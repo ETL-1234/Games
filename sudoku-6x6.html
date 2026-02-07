@@ -222,7 +222,7 @@ function buildGrid() {
       if ((c + 1) % 3 === 0 && c !== 5) cell.classList.add("major-right");
       if ((r + 1) % 2 === 0 && r !== 5) cell.classList.add("major-bottom");
 
-      if (val) {
+      if (val !== 0 && val !== null) {
         const img = document.createElement("img");
         img.src = images[val];
         cell.appendChild(img);
