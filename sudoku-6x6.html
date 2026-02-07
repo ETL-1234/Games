@@ -186,19 +186,9 @@ function initGame(index) {
   const game = games[index];
 
   // Parse JSON fields from Supabase
-  const parsedGrid = typeof game.GridJson === "string"
-  ? JSON.parse(game.GridJson)
-  : game.GridJson;
-
-const parsedImages = typeof game.ImagesJson === "string"
-  ? JSON.parse(game.ImagesJson)
-  : game.ImagesJson;
-
-if (!parsedGrid || !parsedImages) {
-  console.log("Missing grid or images data", game);
-  return;
-}
-
+  const parsedGrid = game.GridJson;
+  const parsedImages = game.ImagesJson;
+  
   images = [null];
   for (let i = 1; i <= 6; i++) {
     images[i] = parsedImages[i];
