@@ -91,6 +91,9 @@ let itemTypes = 5;
 let images = {};
 let gridData = [];
 
+let touchStartX = 0;
+let touchStartY = 0;
+
 let touchStartCell = null;
 let touchEndCell = null;
 
@@ -199,7 +202,12 @@ function renderGrid() {
    START
 ======================= */
 function handleTouchStart(e) {
+  const touch = e.touches[0];
   const cell = e.currentTarget;
+
+  touchStartX = touch.clientX;
+  touchStartY = touch.clientY;
+
   touchStartCell = {
     row: parseInt(cell.dataset.row),
     col: parseInt(cell.dataset.col)
@@ -207,13 +215,42 @@ function handleTouchStart(e) {
 }
 
 function handleTouchEnd(e) {
-  const cell = e.currentTarget;
-  touchEndCell = {
-    row: parseInt(cell.dataset.row),
-    col: parseInt(cell.dataset.col)
-  };
+  if (!touchStartCell) return;
 
-  attemptSwap();
+  const touch = e.changedTouches[0];
+  const dx = touch.clientX - touchStartX;
+  const dy = touch.clientY - touchStartY;
+
+  const absX = Math.abs(dx);
+  const absY = Math.abs(dy);
+
+  let targetRow = touchStartCell.row;
+  let targetCol = touchStartCell.col;
+
+  // Determine swipe direction
+  if (Math.max(absX, absY) < 20) {
+    resetTouch();
+    return; // too small, treat as tap
+  }
+
+  if (absX > absY) {
+    targetCol += dx > 0 ? 1 : -1;
+  } else {
+    targetRow += dy > 0 ? 1 : -1;
+  }
+
+  function attemptSwapWithTarget(r2, c2) {
+  const r1 = touchStartCell.row;
+  const c1 = touchStartCell.col;
+
+  // Bounds check
+  if (
+    r2 < 0 || r2 >= gridRows ||
+    c2 < 0 || c2 >= gridCols
+  ) return;
+
+  swapCells(r1, c1, r2, c2);
+  renderGrid();
 }
 
   function swapCells(r1, c1, r2, c2) {
