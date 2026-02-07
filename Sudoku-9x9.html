@@ -169,7 +169,7 @@ const dotsEl = document.getElementById("dots");
 
 async function loadGames() {
   const response = await fetch(
-    `${SUPABASE_URL}/rest/v1/GamesSudoku?Active=eq.true&Type=eq.6&order=StartDate.desc`,
+    `${SUPABASE_URL}/rest/v1/GamesSudoku?Active=eq.true&Type=eq.9&order=StartDate.desc`,
     {
       headers: {
         apikey: SUPABASE_ANON_KEY,
