@@ -52,7 +52,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .cell img {
@@ -61,10 +60,6 @@ body {
   object-fit: contain;
   pointer-events: none;
   transition: transform 0.3s ease, filter 0.3s ease;
-}
-
-.cell:empty {
-  background: #ffffff;
 }
 
 /* Match highlight */
@@ -95,11 +90,9 @@ const SUPABASE_ANON_KEY = "sb_publishable_VZiTsc0JGVx6tVf2Zu-9uQ_-FwjGpQW";
 ======================= */
 let games = [];
 let currentGame = null;
-
 let gridRows = 9;
 let gridCols = 5;
 let itemTypes = 5;
-
 let images = {};
 let gridData = [];
 
@@ -107,9 +100,6 @@ let touchStartX = 0;
 let touchStartY = 0;
 let touchStartCell = null;
 
-/* =======================
-   ELEMENTS
-======================= */
 const gridEl = document.getElementById("grid");
 const titleEl = document.getElementById("gameTitle");
 
@@ -128,7 +118,6 @@ async function loadGames() {
   );
 
   games = await res.json();
-
   if (!games.length) {
     titleEl.textContent = "No active games";
     return;
@@ -142,11 +131,9 @@ async function loadGames() {
 ======================= */
 function initGame(game) {
   currentGame = game;
-
   gridRows = game.GridRows;
   gridCols = game.GridCols;
   itemTypes = game.ItemTypes;
-
   images = game.ImagesJson;
 
   document.documentElement.style.setProperty('--bg-color', game.BgColor);
@@ -155,7 +142,7 @@ function initGame(game) {
   titleEl.textContent = game.Name;
 
   buildEmptyGrid();
-  fillGridRandomly();
+  fillGridRandomlyNoMatches(); // fill with no initial matches
   renderGrid();
 }
 
@@ -166,6 +153,12 @@ function buildEmptyGrid() {
   gridData = Array.from({ length: gridRows }, () =>
     Array.from({ length: gridCols }, () => null)
   );
+}
+
+function fillGridRandomlyNoMatches() {
+  do {
+    fillGridRandomly();
+  } while (findMatches().size > 0);
 }
 
 function fillGridRandomly() {
@@ -212,48 +205,24 @@ function renderGrid() {
 /* =======================
    MATCH DETECTION
 ======================= */
-function hasMatchAt(row, col) {
-  const value = gridData[row][col];
-  if (!value) return false;
-
-  let count = 1;
-  for (let c = col - 1; c >= 0 && gridData[row][c] === value; c--) count++;
-  for (let c = col + 1; c < gridCols && gridData[row][c] === value; c++) count++;
-  if (count >= 3) return true;
-
-  count = 1;
-  for (let r = row - 1; r >= 0 && gridData[r][col] === value; r--) count++;
-  for (let r = row + 1; r < gridRows && gridData[r][col] === value; r++) count++;
-  return count >= 3;
-}
-
 function findMatches() {
   const matches = new Set();
-
-  // Horizontal
+  // horizontal
   for (let r = 0; r < gridRows; r++) {
     let count = 1;
     for (let c = 1; c <= gridCols; c++) {
-      if (c < gridCols && gridData[r][c] === gridData[r][c-1] && gridData[r][c] !== null) count++;
-      else {
-        if (count >= 3) for (let k=0;k<count;k++) matches.add(`${r},${c-1-k}`);
-        count = 1;
-      }
+      if (c < gridCols && gridData[r][c] === gridData[r][c-1] && gridData[r][c]!==null) count++;
+      else { if (count>=3) for(let k=0;k<count;k++) matches.add(`${r},${c-1-k}`); count=1; }
     }
   }
-
-  // Vertical
+  // vertical
   for (let c = 0; c < gridCols; c++) {
     let count = 1;
     for (let r = 1; r <= gridRows; r++) {
-      if (r < gridRows && gridData[r][c] === gridData[r-1][c] && gridData[r][c] !== null) count++;
-      else {
-        if (count >= 3) for (let k=0;k<count;k++) matches.add(`${r-1-k},${c}`);
-        count = 1;
-      }
+      if (r < gridRows && gridData[r][c] === gridData[r-1][c] && gridData[r][c]!==null) count++;
+      else { if (count>=3) for(let k=0;k<count;k++) matches.add(`${r-1-k},${c}`); count=1; }
     }
   }
-
   return matches;
 }
 
@@ -261,17 +230,14 @@ function findMatches() {
    ANIMATED MATCH CLEAR
 ======================= */
 async function animateMatches(matches) {
-  // Highlight matches
+  // Highlight
   matches.forEach(key => {
     const [r,c] = key.split(',').map(Number);
     const cell = gridEl.querySelector(`.cell[data-row='${r}'][data-col='${c}']`);
-    if (cell && cell.firstChild) {
-      cell.firstChild.classList.add('match');
-    }
+    if (cell && cell.firstChild) cell.firstChild.classList.add('match');
   });
 
-  // Wait for animation duration
-  await new Promise(res => setTimeout(res, 300));
+  await new Promise(res => setTimeout(res, 300)); // wait for animation
 
   // Remove matched items
   matches.forEach(key => {
@@ -279,33 +245,25 @@ async function animateMatches(matches) {
     gridData[r][c] = null;
   });
 
-  renderGrid();
+  renderGrid(); // re-render empty slots
 
-  // Apply gravity + refill
   applyGravity();
   refillGrid();
   renderGrid();
 
-  // Check for new matches recursively
   const newMatches = findMatches();
-  if (newMatches.size > 0) {
-    await animateMatches(newMatches);
-  }
+  if (newMatches.size>0) await animateMatches(newMatches);
 }
 
 /* =======================
    GRAVITY + REFILL
 ======================= */
 function applyGravity() {
-  for (let c = 0; c < gridCols; c++) {
-    for (let r = gridRows - 1; r >= 0; r--) {
-      if (gridData[r][c] === null) {
-        for (let k = r - 1; k >= 0; k--) {
-          if (gridData[k][c] !== null) {
-            gridData[r][c] = gridData[k][c];
-            gridData[k][c] = null;
-            break;
-          }
+  for (let c=0;c<gridCols;c++) {
+    for (let r=gridRows-1;r>=0;r--) {
+      if (gridData[r][c]===null) {
+        for (let k=r-1;k>=0;k--) {
+          if (gridData[k][c]!==null) { gridData[r][c]=gridData[k][c]; gridData[k][c]=null; break; }
         }
       }
     }
@@ -313,9 +271,9 @@ function applyGravity() {
 }
 
 function refillGrid() {
-  for (let r = 0; r < gridRows; r++) {
-    for (let c = 0; c < gridCols; c++) {
-      if (gridData[r][c] === null) gridData[r][c] = randomItem();
+  for (let r=0;r<gridRows;r++) {
+    for (let c=0;c<gridCols;c++) {
+      if (gridData[r][c]===null) gridData[r][c]=randomItem();
     }
   }
 }
@@ -340,7 +298,7 @@ function handleTouchEnd(e) {
 
   let targetRow = touchStartCell.row;
   let targetCol = touchStartCell.col;
-  if (Math.abs(dx) > Math.abs(dy)) targetCol += dx>0?1:-1;
+  if (Math.abs(dx)>Math.abs(dy)) targetCol += dx>0?1:-1;
   else targetRow += dy>0?1:-1;
 
   attemptSwapWithTarget(targetRow,targetCol);
@@ -356,21 +314,14 @@ async function attemptSwapWithTarget(r2,c2) {
   renderGrid();
 
   const matches = findMatches();
-  if (matches.size>0) {
-    await animateMatches(matches);
-  } else {
-    swapCells(r1,c1,r2,c2); // revert if no match
-    renderGrid();
-  }
+  if (matches.size>0) await animateMatches(matches);
+  else { swapCells(r1,c1,r2,c2); renderGrid(); }
 }
 
 function swapCells(r1,c1,r2,c2) {
-  const temp = gridData[r1][c1];
-  gridData[r1][c1] = gridData[r2][c2];
-  gridData[r2][c2] = temp;
+  const temp = gridData[r1][c1]; gridData[r1][c1]=gridData[r2][c2]; gridData[r2][c2]=temp;
 }
-
-function resetTouch() { touchStartCell = null; }
+function resetTouch(){ touchStartCell=null; }
 
 /* =======================
    INIT
