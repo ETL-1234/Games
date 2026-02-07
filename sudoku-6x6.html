@@ -71,10 +71,16 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 42px;
+  font-size: 56px;
+  Font-weight: 600;
+  letter-spacing: 1px;
   color: var(--overlay-text);
+  text-align: center;
   opacity: 0;
   transition: opacity 0.6s;
+  pointer-events: none;
+  z-index: 10;
+  transition: opacity 1.2s ease-in-out;
 }
 
 .palette {
@@ -88,6 +94,7 @@ body {
   width: 100%;
   aspect-ratio: 1 / 1;
   object-fit: contain;
+  cursor: pointer;
 }
 
 .controls { display: flex; gap: 12px; }
@@ -95,10 +102,13 @@ body {
 button {
   flex: 1;
   padding: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
   border-radius: 10px;
   border: none;
   background: var(--button-color);
   color: var(--button-text);
+  cursor: pointer;
 }
 
 .dots {
@@ -171,7 +181,7 @@ async function loadGames() {
   games = data;
 
   if (!games.length) {
-    console.log("No games returned from Supabase");
+    console.log("No games returned from Database");
     return;
   }
 
@@ -196,6 +206,7 @@ function initGame(index) {
 
   startPuzzle = parsedGrid;
   puzzle = JSON.parse(JSON.stringify(startPuzzle));
+  let selectedCell = null;
   history = [];
 
   // Optional: apply colors dynamically
@@ -317,6 +328,48 @@ function resetGrid() {
   buildGrid();
 }
 
+  function showOverlay(text) {
+  overlay.textContent = text;
+  overlay.style.opacity = 1;
+  setTimeout(() => overlay.style.opacity = 0, 2400);
+}
+/* VALIDATION */
+function isValidSet(arr) {
+  const set = new Set(arr);
+  return set.size === 6 && !arr.includes(0);
+}
+
+function checkCompletion() {
+  if (puzzle.flat().includes(0)) return;
+
+  // Rows
+  for (let r=0;r<6;r++) {
+    if (!isValidSet(puzzle[r])) { showOverlay("Please try again"); return; }
+  }
+
+  // Columns
+  for (let c=0;c<6;c++) {
+    const col = puzzle.map(row=>row[c]);
+    if (!isValidSet(col)) { showOverlay("Please try again"); return; }
+  }
+
+  // 3x2 Boxes (3 cols × 2 rows)
+  for (let br=0;br<2;br++) {       // box column start
+    for (let bc=0; bc<3; bc++) {   // box row start
+      const box = [];
+      for (let r=bc*2; r<bc*2+2; r++) {
+        for (let c=br*3; c<br*3+3; c++) {
+          box.push(puzzle[r][c]);
+        }
+      }
+      if (!isValidSet(box)) { showOverlay("Please try again"); return; }
+    }
+  }
+
+  showOverlay("Completed");
+}
+
+  
 loadGames();
 </script>
 </body>
