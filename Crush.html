@@ -91,6 +91,9 @@ let itemTypes = 5;
 let images = {};
 let gridData = [];
 
+let touchStartCell = null;
+let touchEndCell = null;
+
 /* =======================
    ELEMENTS
 ======================= */
@@ -179,6 +182,9 @@ function renderGrid() {
       cell.dataset.row = r;
       cell.dataset.col = c;
 
+      cell.addEventListener("touchstart", handleTouchStart);
+      cell.addEventListener("touchend", handleTouchEnd);
+
       const img = document.createElement("img");
       img.src = images[val];
       cell.appendChild(img);
@@ -188,10 +194,63 @@ function renderGrid() {
   });
 }
 
+
 /* =======================
    START
 ======================= */
-loadGames();
+function handleTouchStart(e) {
+  const cell = e.currentTarget;
+  touchStartCell = {
+    row: parseInt(cell.dataset.row),
+    col: parseInt(cell.dataset.col)
+  };
+}
+
+function handleTouchEnd(e) {
+  const cell = e.currentTarget;
+  touchEndCell = {
+    row: parseInt(cell.dataset.row),
+    col: parseInt(cell.dataset.col)
+  };
+
+  attemptSwap();
+}
+
+  function swapCells(r1, c1, r2, c2) {
+  const temp = gridData[r1][c1];
+  gridData[r1][c1] = gridData[r2][c2];
+  gridData[r2][c2] = temp;
+}
+
+  function resetTouch() {
+  touchStartCell = null;
+  touchEndCell = null;
+}
+
+  function attemptSwap() {
+  if (!touchStartCell || !touchEndCell) return;
+
+  const r1 = touchStartCell.row;
+  const c1 = touchStartCell.col;
+  const r2 = touchEndCell.row;
+  const c2 = touchEndCell.col;
+
+  const rowDiff = Math.abs(r1 - r2);
+  const colDiff = Math.abs(c1 - c2);
+
+  // Only allow adjacent swaps
+  if (rowDiff + colDiff !== 1) {
+    resetTouch();
+    return;
+  }
+
+  swapCells(r1, c1, r2, c2);
+  renderGrid();
+
+  resetTouch();
+}
+
+  loadGames();
 </script>
 </body>
 </html>
