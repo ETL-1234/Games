@@ -253,9 +253,24 @@ function attemptSwapWithTarget(r2, c2) {
     c2 < 0 || c2 >= gridCols
   ) return;
 
+  // Perform swap
   swapCells(r1, c1, r2, c2);
+
+  // Check if swap creates a match
+  const valid =
+    hasMatchAt(r1, c1) ||
+    hasMatchAt(r2, c2);
+
+  if (!valid) {
+    // Revert swap if invalid
+    swapCells(r1, c1, r2, c2);
+    return;
+  }
+
+  // Keep swap
   renderGrid();
 }
+
 
 function swapCells(r1, c1, r2, c2) {
   const temp = gridData[r1][c1];
