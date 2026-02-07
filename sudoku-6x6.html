@@ -178,21 +178,34 @@ async function loadGames() {
 function initGame(index) {
   currentIndex = index;
   const game = games[index];
-  document.getElementById("gameTitle").textContent = game.Name;
-  
+
+  // Parse JSON fields from Supabase
+  const parsedGrid = JSON.parse(game.GridJson);
+  const parsedImages = JSON.parse(game.ImagesJson);
+
   images = [null];
   for (let i = 1; i <= 6; i++) {
-    images[i] = game.images[i];
+    images[i] = parsedImages[i];
   }
 
-  startPuzzle = game.grid;
+  startPuzzle = parsedGrid;
   puzzle = JSON.parse(JSON.stringify(startPuzzle));
   history = [];
 
- buildGrid();
- buildPalette();
- updateDots();
+  // Optional: apply colors dynamically
+  document.documentElement.style.setProperty('--bg-color', game.BgColor);
+  document.documentElement.style.setProperty('--grid-color', game.GridColor);
+  document.documentElement.style.setProperty('--button-color', game.ButtonColor);
+  document.documentElement.style.setProperty('--button-text', game.ButtonTextColor);
+  document.documentElement.style.setProperty('--font-color', game.FontColor);
+
+  document.getElementById("gameTitle").textContent = game.Name;
+
+  buildGrid();
+  buildPalette();
+  updateDots();
 }
+
   
 function buildGrid() {
   gridEl.innerHTML = "";
