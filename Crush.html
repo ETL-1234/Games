@@ -60,6 +60,10 @@ body {
   object-fit: contain;
   pointer-events: none;
 }
+
+.cell:empty {
+  background: #f5f5f5;
+}
 </style>
 </head>
 
@@ -93,9 +97,7 @@ let gridData = [];
 
 let touchStartX = 0;
 let touchStartY = 0;
-
 let touchStartCell = null;
-let touchEndCell = null;
 
 /* =======================
    ELEMENTS
@@ -185,21 +187,98 @@ function renderGrid() {
       cell.dataset.row = r;
       cell.dataset.col = c;
 
-     cell.addEventListener("touchstart", handleTouchStart, { passive: true });
-     cell.addEventListener("touchend", handleTouchEnd, { passive: true });
+      cell.addEventListener("touchstart", handleTouchStart, { passive: true });
+      cell.addEventListener("touchend", handleTouchEnd, { passive: true });
 
-      const img = document.createElement("img");
-      img.src = images[val];
-      cell.appendChild(img);
+      if (val !== null) {
+        const img = document.createElement("img");
+        img.src = images[val];
+        cell.appendChild(img);
+      }
 
       gridEl.appendChild(cell);
     });
   });
 }
-/* =======================
-   START (TOUCH + SWAP)
-======================= */
 
+/* =======================
+   MATCH DETECTION + REMOVAL
+======================= */
+function hasMatchAt(row, col) {
+  const value = gridData[row][col];
+  if (!value) return false;
+
+  let count = 1;
+  // Horizontal
+  for (let c = col - 1; c >= 0 && gridData[row][c] === value; c--) count++;
+  for (let c = col + 1; c < gridCols && gridData[row][c] === value; c++) count++;
+  if (count >= 3) return true;
+
+  count = 1;
+  // Vertical
+  for (let r = row - 1; r >= 0 && gridData[r][col] === value; r--) count++;
+  for (let r = row + 1; r < gridRows && gridData[r][col] === value; r++) count++;
+  return count >= 3;
+}
+
+function findMatches() {
+  const matches = new Set();
+
+  // Horizontal matches
+  for (let r = 0; r < gridRows; r++) {
+    let count = 1;
+    for (let c = 1; c <= gridCols; c++) {
+      if (
+        c < gridCols &&
+        gridData[r][c] === gridData[r][c - 1] &&
+        gridData[r][c] !== null
+      ) {
+        count++;
+      } else {
+        if (count >= 3) {
+          for (let k = 0; k < count; k++) {
+            matches.add(`${r},${c - 1 - k}`);
+          }
+        }
+        count = 1;
+      }
+    }
+  }
+
+  // Vertical matches
+  for (let c = 0; c < gridCols; c++) {
+    let count = 1;
+    for (let r = 1; r <= gridRows; r++) {
+      if (
+        r < gridRows &&
+        gridData[r][c] === gridData[r - 1][c] &&
+        gridData[r][c] !== null
+      ) {
+        count++;
+      } else {
+        if (count >= 3) {
+          for (let k = 0; k < count; k++) {
+            matches.add(`${r - 1 - k},${c}`);
+          }
+        }
+        count = 1;
+      }
+    }
+  }
+
+  return matches;
+}
+
+function removeMatches(matches) {
+  matches.forEach(key => {
+    const [r, c] = key.split(',').map(Number);
+    gridData[r][c] = null;
+  });
+}
+
+/* =======================
+   TOUCH + SWAP
+======================= */
 function handleTouchStart(e) {
   const touch = e.touches[0];
   const cell = e.currentTarget;
@@ -223,7 +302,6 @@ function handleTouchEnd(e) {
   const absX = Math.abs(dx);
   const absY = Math.abs(dy);
 
-  // Ignore tiny movements
   if (Math.max(absX, absY) < 20) {
     resetTouch();
     return;
@@ -232,7 +310,6 @@ function handleTouchEnd(e) {
   let targetRow = touchStartCell.row;
   let targetCol = touchStartCell.col;
 
-  // Decide swipe direction
   if (absX > absY) {
     targetCol += dx > 0 ? 1 : -1;
   } else {
@@ -247,30 +324,20 @@ function attemptSwapWithTarget(r2, c2) {
   const r1 = touchStartCell.row;
   const c1 = touchStartCell.col;
 
-  // Bounds check
-  if (
-    r2 < 0 || r2 >= gridRows ||
-    c2 < 0 || c2 >= gridCols
-  ) return;
+  if (r2 < 0 || r2 >= gridRows || c2 < 0 || c2 >= gridCols) return;
 
-  // Perform swap
   swapCells(r1, c1, r2, c2);
 
-  // Check if swap creates a match
-  const valid =
-    hasMatchAt(r1, c1) ||
-    hasMatchAt(r2, c2);
+  const matches = findMatches();
 
-  if (!valid) {
-    // Revert swap if invalid
+  if (matches.size > 0) {
+    removeMatches(matches);
+  } else {
     swapCells(r1, c1, r2, c2);
-    return;
   }
 
-  // Keep swap
   renderGrid();
 }
-
 
 function swapCells(r1, c1, r2, c2) {
   const temp = gridData[r1][c1];
@@ -282,48 +349,10 @@ function resetTouch() {
   touchStartCell = null;
 }
 
-  function hasMatchAt(row, col) {
-  const value = gridData[row][col];
-  if (!value) return false;
-
-  // --- Horizontal check ---
-  let count = 1;
-
-  // left
-  for (let c = col - 1; c >= 0 && gridData[row][c] === value; c--) {
-    count++;
-  }
-
-  // right
-  for (let c = col + 1; c < gridCols && gridData[row][c] === value; c++) {
-    count++;
-  }
-
-  if (count >= 3) return true;
-
-  // --- Vertical check ---
-  count = 1;
-
-  // up
-  for (let r = row - 1; r >= 0 && gridData[r][col] === value; r--) {
-    count++;
-  }
-
-  // down
-  for (let r = row + 1; r < gridRows && gridData[r][col] === value; r++) {
-    count++;
-  }
-
-  return count >= 3;
-}
-
-
 /* =======================
    INIT
 ======================= */
-
-  loadGames();
+loadGames();
 </script>
 </body>
 </html>
-
