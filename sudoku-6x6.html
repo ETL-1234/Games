@@ -298,6 +298,7 @@ function placePearl(val) {
   history.push(JSON.parse(JSON.stringify(puzzle)));
   puzzle[r][c] = val;
   buildGrid();
+  checkCompletion();
 }
 
 function undo() {
