@@ -179,6 +179,18 @@ function initGame(game) {
   renderGrid();
 }
 
+  score = 0;
+movesLeft = game.Moves; // ← from Supabase
+
+updateHUD();
+
+  function updateHUD() {
+  scoreEl.textContent = `Score: ${score}`;
+  movesEl.textContent = `Moves: ${movesLeft}`;
+}
+
+
+
 /* ================= GRID BUILD ================= */
 function buildGridNoMatches() {
   do {
