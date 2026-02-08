@@ -269,16 +269,33 @@ function handleTouchEnd(e) {
 }
 
 async function attemptSwap(r2, c2) {
-  const { row:r1, col:c1 } = touchStartCell;
+  const { row: r1, col: c1 } = touchStartCell;
   if (r2 < 0 || c2 < 0 || r2 >= gridRows || c2 >= gridCols) return;
 
-  swap(r1,c1,r2,c2);
+  const cell1 = gridEl.querySelector(`.cell[data-row='${r1}'][data-col='${c1}']`);
+  const cell2 = gridEl.querySelector(`.cell[data-row='${r2}'][data-col='${c2}']`);
+
+  const dx = c2 - c1;
+  const dy = r2 - r1;
+
+  if (dx === 1) { cell1.classList.add('swap-right'); cell2.classList.add('swap-left'); }
+  if (dx === -1){ cell1.classList.add('swap-left');  cell2.classList.add('swap-right'); }
+  if (dy === 1) { cell1.classList.add('swap-down');  cell2.classList.add('swap-up'); }
+  if (dy === -1){ cell1.classList.add('swap-up');    cell2.classList.add('swap-down'); }
+
+  await new Promise(r => setTimeout(r, 250));
+
+  swap(r1, c1, r2, c2);
   renderGrid();
 
   const matches = findMatches();
   if (matches.size) await animateMatches(matches);
-  else { swap(r1,c1,r2,c2); renderGrid(); }
+  else {
+    swap(r1, c1, r2, c2);
+    renderGrid();
+  }
 }
+
 
 function swap(r1,c1,r2,c2){
   [gridData[r1][c1], gridData[r2][c2]] =
