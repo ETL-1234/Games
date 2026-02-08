@@ -157,14 +157,26 @@ function renderGrid() {
       cell.addEventListener("touchstart", handleTouchStart, { passive: true });
       cell.addEventListener("touchend", handleTouchEnd, { passive: true });
 
-      const img = document.createElement("img");
-      img.src = images[gridData[r][c]];
-      cell.appendChild(img);
+      if (gridData[r][c] !== null) {
+        const img = document.createElement("img");
+        img.src = images[gridData[r][c]];
+
+        // NEW: falling effect
+        if (r === 0) cell.classList.add("fall");
+
+        cell.appendChild(img);
+      }
 
       gridEl.appendChild(cell);
     }
   }
+
+  // Remove fall class AFTER render so animation plays
+  requestAnimationFrame(() => {
+    document.querySelectorAll(".cell.fall").forEach(c => c.classList.remove("fall"));
+  });
 }
+
 
 /* ================= MATCH FIND ================= */
 function findMatches() {
