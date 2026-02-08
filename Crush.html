@@ -80,9 +80,14 @@ body {
 }
 
 /* Falling animation */
-img.fall {
-  transform: translateY(-120%);
+.cell img {
+  transition: transform 0.35s ease;
 }
+
+.cell img.fall {
+  transform: translateY(calc(var(--fall) * -100%));
+}
+
   
 </style>
 </head>
