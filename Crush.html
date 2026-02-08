@@ -156,7 +156,7 @@ function renderGrid() {
   for (let r = 0; r < gridRows; r++) {
     for (let c = 0; c < gridCols; c++) {
       const cell = document.createElement("div");
-      cell.className = "cell";
+      cell.className = "cell fall";   // ← START ABOVE
       cell.dataset.row = r;
       cell.dataset.col = c;
 
@@ -166,10 +166,6 @@ function renderGrid() {
       if (gridData[r][c] !== null) {
         const img = document.createElement("img");
         img.src = images[gridData[r][c]];
-
-        // NEW: falling effect
-        if (r === 0) cell.classList.add("fall");
-
         cell.appendChild(img);
       }
 
@@ -177,10 +173,14 @@ function renderGrid() {
     }
   }
 
+  // ↓ NEXT FRAME → drop into place
   requestAnimationFrame(() => {
-    document.querySelectorAll(".cell.fall").forEach(c => c.classList.remove("fall"));
+    document.querySelectorAll(".cell.fall").forEach(cell =>
+      cell.classList.remove("fall")
+    );
   });
 }
+
 
 /* ================= MATCH FIND ================= */
 function findMatches() {
