@@ -147,6 +147,7 @@ function randomItem() {
 }
 
 /* ================= RENDER ================= */
+
 function renderGrid() {
   gridEl.innerHTML = "";
   gridEl.style.gridTemplateColumns = `repeat(${gridCols}, 1fr)`;
@@ -176,12 +177,10 @@ function renderGrid() {
     }
   }
 
-  // Remove fall class AFTER render so animation plays
   requestAnimationFrame(() => {
     document.querySelectorAll(".cell.fall").forEach(c => c.classList.remove("fall"));
   });
 }
-
 
 /* ================= MATCH FIND ================= */
 function findMatches() {
