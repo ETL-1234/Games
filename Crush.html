@@ -147,14 +147,12 @@ function randomItem() {
 }
 
 /* ================= RENDER ================= */
-
-/* ================= RENDER ================= */
-function renderGrid() {
+function renderGrid(fallMap = null) {
   gridEl.innerHTML = "";
   gridEl.style.gridTemplateColumns = `repeat(${gridCols}, 1fr)`;
   gridEl.style.gridTemplateRows = `repeat(${gridRows}, 1fr)`;
 
-  const fallingImages = [];
+  const animatedImages = [];
 
   for (let r = 0; r < gridRows; r++) {
     for (let c = 0; c < gridCols; c++) {
@@ -170,9 +168,12 @@ function renderGrid() {
         const img = document.createElement("img");
         img.src = images[gridData[r][c]];
 
-        // START ABOVE
-        img.classList.add("fall");
-        fallingImages.push(img);
+        // Animate falling distance
+        if (fallMap && fallMap[r][c] > 0) {
+          img.style.setProperty("--fall", fallMap[r][c]);
+          img.classList.add("fall");
+          animatedImages.push(img);
+        }
 
         cell.appendChild(img);
       }
@@ -181,9 +182,8 @@ function renderGrid() {
     }
   }
 
-  // NEXT FRAME → allow CSS to animate
   requestAnimationFrame(() => {
-    fallingImages.forEach(img => img.classList.remove("fall"));
+    animatedImages.forEach(img => img.classList.remove("fall"));
   });
 }
 
@@ -233,38 +233,39 @@ async function animateMatches(matches) {
     gridData[r][c] = null;
   });
 
-  applyGravity();
-  refillGrid();
-  renderGrid();
+  const fallMap = applyGravity();
+refillGrid();
+renderGrid(fallMap);
 
   const next = findMatches();
   if (next.size > 0) await animateMatches(next);
 }
 
 /* ================= GRAVITY + REFILL ================= */
+
 function applyGravity() {
+  const fallMap = Array.from({ length: gridRows }, () =>
+    Array(gridCols).fill(0)
+  );
+
   for (let c = 0; c < gridCols; c++) {
+    let writeRow = gridRows - 1;
+
     for (let r = gridRows - 1; r >= 0; r--) {
-      if (gridData[r][c] === null) {
-        for (let k = r - 1; k >= 0; k--) {
-          if (gridData[k][c] !== null) {
-            gridData[r][c] = gridData[k][c];
-            gridData[k][c] = null;
-            break;
-          }
+      if (gridData[r][c] !== null) {
+        if (writeRow !== r) {
+          gridData[writeRow][c] = gridData[r][c];
+          gridData[r][c] = null;
+          fallMap[writeRow][c] = writeRow - r;
         }
+        writeRow--;
       }
     }
   }
+
+  return fallMap;
 }
 
-function refillGrid() {
-  for (let r = 0; r < gridRows; r++) {
-    for (let c = 0; c < gridCols; c++) {
-      if (gridData[r][c] === null) gridData[r][c] = randomItem();
-    }
-  }
-}
 
 /* ================= TOUCH + SWAP ================= */
 function handleTouchStart(e) {
