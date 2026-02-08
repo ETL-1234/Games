@@ -152,8 +152,12 @@ function randomItem() {
 }
 
 /* ================= RENDER ================= */
+
 function renderGrid(fallMap = null) {
+
+  // ⛔ DO NOT wipe grid during animations
   gridEl.innerHTML = "";
+
   gridEl.style.gridTemplateColumns = `repeat(${gridCols}, 1fr)`;
   gridEl.style.gridTemplateRows = `repeat(${gridRows}, 1fr)`;
 
@@ -169,14 +173,14 @@ function renderGrid(fallMap = null) {
       cell.addEventListener("touchstart", handleTouchStart, { passive: true });
       cell.addEventListener("touchend", handleTouchEnd, { passive: true });
 
-      if (gridData[r][c] !== null) {
+      const value = gridData[r][c];
+      if (value !== null) {
         const img = document.createElement("img");
-        img.src = images[gridData[r][c]];
+        img.src = images[value];
 
-        // Animate falling distance
+        // 🔥 IMPORTANT: apply offset BEFORE render
         if (fallMap && fallMap[r][c] > 0) {
-          img.style.setProperty("--fall", fallMap[r][c]);
-          img.classList.add("fall");
+          img.style.transform = `translateY(${fallMap[r][c] * -100}%)`;
           animatedImages.push(img);
         }
 
@@ -187,12 +191,13 @@ function renderGrid(fallMap = null) {
     }
   }
 
+  // 🔥 NEXT FRAME → animate to zero
   requestAnimationFrame(() => {
-    animatedImages.forEach(img => img.classList.remove("fall"));
+    animatedImages.forEach(img => {
+      img.style.transform = "translateY(0)";
+    });
   });
 }
-
-
 
 /* ================= MATCH FIND ================= */
 function findMatches() {
