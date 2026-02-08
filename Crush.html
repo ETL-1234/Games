@@ -412,11 +412,19 @@ async function attemptSwap(r2, c2) {
   renderGrid();
 
   const matches = findMatches();
-  if (matches.size) await animateMatches(matches);
-  else {
-    swap(r1, c1, r2, c2);
-    renderGrid();
+ if (matches.size) {
+  movesLeft--;
+  updateHUD();
+
+  await animateMatches(matches);
+
+  if (movesLeft <= 0) {
+    endGame();
   }
+} else {
+  swap(r1, c1, r2, c2);
+  renderGrid();
+}
 }
 
 
