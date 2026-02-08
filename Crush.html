@@ -154,6 +154,14 @@ let touchStartX = 0, touchStartY = 0;
 const gridEl = document.getElementById("grid");
 const titleEl = document.getElementById("gameTitle");
 
+  // ---------------- HUD & OVERLAY ----------------
+let score = 0;
+let movesLeft = 0;
+
+const scoreEl = document.getElementById("scoreText");
+const movesEl = document.getElementById("movesText");
+const overlay = document.getElementById("overlayText");
+
 /* ================= INIT ================= */
 async function loadGames() {
   const res = await fetch(
