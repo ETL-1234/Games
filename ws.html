@@ -8,6 +8,7 @@
   --bg-color: #dbe7e0;
   --draw-color: #b3d1c2;
   --grid-border: #000;
+  --cell-size: 34px;
 }
 
 body {
@@ -17,7 +18,6 @@ body {
   background: var(--bg-color);
   display: flex;
   justify-content: center;
-  overflow-x: hidden;
 }
 
 .app { max-width: 420px; width: 100%; }
@@ -30,31 +30,25 @@ h1 {
 
 .grid-wrapper {
   position: relative;
-  width: 100%;
-  max-width: 420px;
-  margin: 0 auto;
+  padding: 12px;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(10, 1fr);
+  grid-template-columns: repeat(10, var(--cell-size));
+  grid-auto-rows: var(--cell-size);
   gap: 4px;
-  width: 100%;
-  aspect-ratio: 10 / 14;
   touch-action: none;
 }
 
 .cell {
-  aspect-ratio: 1 / 1;
   background: #fff;
   border: 1px solid var(--grid-border);
   display: flex;
   align-items: center;
   justify-content: center;
   user-select: none;
-  font-size: clamp(14px, 2.5vw, 18px);
 }
-
 
 svg {
   position: absolute;
@@ -208,8 +202,8 @@ function buildGrid() {
   });
 
   const rows = LETTERS.length / COLS;
-  svg.setAttribute("width", grid.offsetWidth);
-  svg.setAttribute("height", grid.offsetHeight);
+  svg.setAttribute("width", COLS * CELL + (COLS - 1) * GAP);
+  svg.setAttribute("height", rows * CELL + (rows - 1) * GAP);
 }
 
 function buildWords() {
