@@ -8,7 +8,6 @@
   --bg-color: #dbe7e0;
   --draw-color: #b3d1c2;
   --grid-border: #000;
-  --cell-size: 34px;
 }
 
 body {
@@ -43,13 +42,16 @@ h1 {
 }
 
 .cell {
+  aspect-ratio: 1 / 1;
   background: #fff;
   border: 1px solid var(--grid-border);
   display: flex;
   align-items: center;
   justify-content: center;
   user-select: none;
+  font-size: clamp(14px, 2.5vw, 18px);
 }
+
 
 svg {
   position: absolute;
