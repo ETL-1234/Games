@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root {
+  --bg-color: #dbe7e0;
+  --draw-color: #b3d1c2;
+  --grid-border: #000;
+  --cell-size: 34px;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.background {
+  min-height: 100vh;
+  background: var(--bg-color);
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+
+.container {
+  max-width: 420px;
+  width: 100%;
+  display: flex;
+  flex-direction: column; /* stack vertically */
+  align-items: center;
+}
+
+h1 {
+  width: 100%;
+  text-align: center;
+  margin: 0 0 16px 0;
+  font-size: 20px;
+}
+
+.grid-wrapper {
+  position: relative;
+  padding: 12px;
+  width: 100%;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(10, var(--cell-size));
+  grid-auto-rows: var(--cell-size);
+  gap: 4px;
+  touch-action: none; /* only grid disables touch scroll */
+}
+
+.cell {
+  background: #fff;
+  border: 1px solid var(--grid-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+svg {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  pointer-events: none;
+}
+
+#completedOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: bold;
+  color: black;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+
+.word-list {
+  margin-top: 18px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 24px;
+  font-size: 14px;
+}
+
+.word {
+  position: relative;
+}
+
+.word.found::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 3px;
+  background: var(--draw-color);
+  transform: translateY(-50%);
+  border-radius: 2px;
+}
+
+@keyframes glow {
+  0%   { filter: drop-shadow(0 0 0px var(--draw-color)); }
+  50%  { filter: drop-shadow(0 0 6px var(--draw-color)); }
+  100% { filter: drop-shadow(0 0 0px var(--draw-color)); }
+}
+
+svg line.locked {
+  animation: glow 0.6s ease-out;
+  stroke-opacity: 0.6;
+}
+</style>
+</head>
+
+<body>
+<div class="background">
+<div class="container">
+
+<h1>MIND BODY MAGIC</h1>
+
+<div class="grid-wrapper">
+  <div class="grid" id="grid"></div>
+  <svg id="svg"></svg>
+  
+  <!-- COMPLETED OVERLAY -->
+  <div id="completedOverlay" style="
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform: translate(calc(-50% - 10px), -50%);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:64px;          /* slightly bigger */
+  font-weight:bold;
+  color:rgba(0,0,0,0.7);
+  opacity:0;
+  pointer-events:none;
+  transition: opacity 2s ease; /* slower, softer fade */
+  text-align:center;
+">Completed!</div>
+
+
+</div>
+
+<div class="word-list" id="wordList"></div>
+
+</div>
+</div>
+
+<script>
+const COLS = 10;
+const CELL = 34;
+const GAP = 4;
+
+const LETTERS = [
+"P","R","E","S","E","N","C","E","G","H",
+"L","M","I","N","D","S","E","T","R","E",
+"C","I","R","S","E","U","V","H","O","A",
+"A","L","G","E","L","R","X","U","U","L",
+"R","Y","C","H","S","E","G","W","N","I",
+"E","I","O","A","T","E","E","Y","D","N",
+"R","N","S","L","O","W","T","P","E","G",
+"H","B","A","L","A","N","C","E","D","I",
+"U","N","N","J","Q","K","G","X","U","B",
+"G","K","I","N","D","N","E","S","S","R",
+"I","N","T","E","N","T","I","O","N","E",
+"Y","O","G","A","E","F","L","O","W","A",
+"C","L","A","R","I","T","Y","Q","U","T",
+"A","W","A","R","E","N","E","S","S","H"
+];
+
+const WORDS = [
+"AWARENESS","BALANCE","BREATH","CLARITY","ENERGY",
+"FLOW","GROUNDED","HEALING","HUG","INTENTION",
+"KINDNESS","LIGHT","PRESENCE","YIN",
+"MINDSET","RESET","SLOW","YOGA","CARE","SLEEP"
+];
+
+const grid = document.getElementById("grid");
+const svg = document.getElementById("svg");
+const wordList = document.getElementById("wordList");
+
+LETTERS.forEach((l, i) => {
+  const c = document.createElement("div");
+  c.className = "cell";
+  c.textContent = l;
+  c.dataset.index = i;
+  grid.appendChild(c);
+});
+
+const rows = LETTERS.length / COLS;
+svg.setAttribute("width", COLS * CELL + (COLS - 1) * GAP);
+svg.setAttribute("height", rows * CELL + (rows - 1) * GAP);
+
+WORDS.forEach(w => {
+  const el = document.createElement("div");
+  el.className = "word";
+  el.id = "word-" + w;
+  el.textContent = w;
+  wordList.appendChild(el);
+});
+
+let startIndex = null;
+let direction = null;
+let path = [];
+let line = null;
+
+function indexToRC(i) {
+  return { r: Math.floor(i / COLS), c: i % COLS };
+}
+
+function getDir(a, b) {
+  const dr = b.r - a.r;
+  const dc = b.c - a.c;
+  if (dr === 0 && dc === 1) return { dr: 0, dc: 1 }; // →
+  if (dc === 0 && dr === 1) return { dr: 1, dc: 0 }; // ↓
+  if (dr >= 1 && dc >= 1) return { dr: 1, dc: 1 };  // ↘
+  return null;
+}
+
+function getCellAt(x, y) {
+  const el = document.elementFromPoint(x, y);
+  return el?.classList.contains("cell") ? el : null;
+}
+
+function cellCenter(i) {
+  const { r, c } = indexToRC(i);
+  return {
+    x: c * (CELL + GAP) + CELL / 2,
+    y: r * (CELL + GAP) + CELL / 2
+  };
+}
+
+function start(x, y) {
+  const cell = getCellAt(x, y);
+  if (!cell) return;
+
+  startIndex = Number(cell.dataset.index);
+  path = [startIndex];
+  direction = null;
+
+  const p = cellCenter(startIndex);
+
+  line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  line.setAttribute("x1", p.x);
+  line.setAttribute("y1", p.y);
+  line.setAttribute("x2", p.x);
+  line.setAttribute("y2", p.y);
+  line.setAttribute("stroke", "var(--draw-color)");
+  line.setAttribute("stroke-width", "6");
+  line.setAttribute("stroke-linecap", "round");
+  line.setAttribute("stroke-opacity", "0.6");
+
+  svg.appendChild(line);
+}
+
+function move(x, y) {
+  if (!line) return;
+
+  const cell = getCellAt(x, y);
+  if (!cell) return;
+
+  const idx = Number(cell.dataset.index);
+  if (path.includes(idx)) return;
+
+  const last = indexToRC(path[path.length - 1]);
+  const curr = indexToRC(idx);
+
+  if (!direction) {
+    direction = getDir(indexToRC(startIndex), curr);
+    if (!direction) return;
+  }
+
+  if (
+    curr.r === last.r + direction.dr &&
+    curr.c === last.c + direction.dc
+  ) {
+    path.push(idx);
+    const p = cellCenter(idx);
+    line.setAttribute("x2", p.x);
+    line.setAttribute("y2", p.y);
+  }
+}
+
+function end() {
+  if (!line) return;
+
+  const word = path.map(i => LETTERS[i]).join("");
+
+  if (WORDS.includes(word)) {
+    line.classList.add("locked"); // glow
+
+    document.getElementById("word-" + word).classList.add("found");
+
+    path.forEach(i => {
+      grid.children[i].classList.add("used");
+    });
+
+    // Completed overlay
+    const allFound = WORDS.every(w => document.getElementById("word-" + w).classList.contains("found"));
+    if (allFound) {
+      const overlay = document.getElementById("completedOverlay");
+      overlay.style.opacity = 1;
+      setTimeout(() => {
+        overlay.style.opacity = 0;
+      }, 2500);
+    }
+  } else {
+    line.remove();
+  }
+
+  line = null;
+  path = [];
+  direction = null;
+  startIndex = null;
+}
+
+/* Mouse */
+document.addEventListener("mousedown", e => start(e.clientX, e.clientY));
+document.addEventListener("mousemove", e => move(e.clientX, e.clientY));
+document.addEventListener("mouseup", end);
+
+/* Touch */
+document.addEventListener("touchstart", e => {
+  e.preventDefault();
+  start(e.touches[0].clientX, e.touches[0].clientY);
+}, { passive: false });
+
+document.addEventListener("touchmove", e => {
+  e.preventDefault();
+  move(e.touches[0].clientX, e.touches[0].clientY);
+}, { passive: false });
+
+document.addEventListener("touchend", e => {
+  e.preventDefault();
+  end();
+});
+</script>
+</body>
+</html>
