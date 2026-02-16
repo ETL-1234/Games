@@ -208,8 +208,8 @@ function buildGrid() {
   });
 
   const rows = LETTERS.length / COLS;
-  svg.setAttribute("width", COLS * CELL + (COLS - 1) * GAP);
-  svg.setAttribute("height", rows * CELL + (rows - 1) * GAP);
+  svg.setAttribute("width", grid.offsetWidth);
+  svg.setAttribute("height", grid.offsetHeight);
 }
 
 function buildWords() {
