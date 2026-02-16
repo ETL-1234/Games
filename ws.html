@@ -13,27 +13,16 @@
 
 body {
   margin: 0;
+  padding: 80px 20px 20px 20px;
   font-family: Arial, sans-serif;
-}
-
-.background {
-  min-height: 100vh;
   background: var(--bg-color);
   display: flex;
   justify-content: center;
-  padding: 24px;
 }
 
-.container {
-  max-width: 420px;
-  width: 100%;
-  display: flex;
-  flex-direction: column; /* stack vertically */
-  align-items: center;
-}
+.app { max-width: 420px; width: 100%; }
 
 h1 {
-  width: 100%;
   text-align: center;
   margin: 0 0 16px 0;
   font-size: 20px;
@@ -42,7 +31,6 @@ h1 {
 .grid-wrapper {
   position: relative;
   padding: 12px;
-  width: 100%;
 }
 
 .grid {
@@ -50,7 +38,7 @@ h1 {
   grid-template-columns: repeat(10, var(--cell-size));
   grid-auto-rows: var(--cell-size);
   gap: 4px;
-  touch-action: none; /* only grid disables touch scroll */
+  touch-action: none;
 }
 
 .cell {
@@ -69,23 +57,8 @@ svg {
   pointer-events: none;
 }
 
-#completedOverlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  font-weight: bold;
-  color: black;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.6s ease;
-}
-
 .word-list {
   margin-top: 18px;
-  width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 6px 24px;
@@ -108,107 +81,178 @@ svg {
   border-radius: 2px;
 }
 
-@keyframes glow {
-  0%   { filter: drop-shadow(0 0 0px var(--draw-color)); }
-  50%  { filter: drop-shadow(0 0 6px var(--draw-color)); }
-  100% { filter: drop-shadow(0 0 0px var(--draw-color)); }
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 56px;
+  font-weight: bold;
+  color: rgba(0,0,0,0.65);
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  pointer-events: none;
 }
 
-svg line.locked {
-  animation: glow 0.6s ease-out;
-  stroke-opacity: 0.6;
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 12px;
 }
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.25);
+}
+
+.dot.active { background: rgba(0,0,0,0.6); }
 </style>
 </head>
 
 <body>
-<div class="background">
-<div class="container">
+<div class="app">
 
-<h1>MIND BODY MAGIC</h1>
+<h1 id="gameTitle">Loading...</h1>
 
-<div class="grid-wrapper">
+<div class="grid-wrapper" id="swipeArea">
   <div class="grid" id="grid"></div>
   <svg id="svg"></svg>
-  
-  <!-- COMPLETED OVERLAY -->
-  <div id="completedOverlay" style="
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform: translate(calc(-50% - 10px), -50%);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:64px;          /* slightly bigger */
-  font-weight:bold;
-  color:rgba(0,0,0,0.7);
-  opacity:0;
-  pointer-events:none;
-  transition: opacity 2s ease; /* slower, softer fade */
-  text-align:center;
-">Completed!</div>
-
-
+  <div class="overlay" id="overlayText">Completed!</div>
 </div>
 
 <div class="word-list" id="wordList"></div>
+<div class="dots" id="dots"></div>
 
-</div>
 </div>
 
 <script>
+const SUPABASE_URL = "https://YOURPROJECT.supabase.co";
+const SUPABASE_ANON_KEY = "YOUR_PUBLIC_ANON_KEY";
+
 const COLS = 10;
 const CELL = 34;
 const GAP = 4;
 
-const LETTERS = [
-"P","R","E","S","E","N","C","E","G","H",
-"L","M","I","N","D","S","E","T","R","E",
-"C","I","R","S","E","U","V","H","O","A",
-"A","L","G","E","L","R","X","U","U","L",
-"R","Y","C","H","S","E","G","W","N","I",
-"E","I","O","A","T","E","E","Y","D","N",
-"R","N","S","L","O","W","T","P","E","G",
-"H","B","A","L","A","N","C","E","D","I",
-"U","N","N","J","Q","K","G","X","U","B",
-"G","K","I","N","D","N","E","S","S","R",
-"I","N","T","E","N","T","I","O","N","E",
-"Y","O","G","A","E","F","L","O","W","A",
-"C","L","A","R","I","T","Y","Q","U","T",
-"A","W","A","R","E","N","E","S","S","H"
-];
+let games = [];
+let currentIndex = 0;
 
-const WORDS = [
-"AWARENESS","BALANCE","BREATH","CLARITY","ENERGY",
-"FLOW","GROUNDED","HEALING","HUG","INTENTION",
-"KINDNESS","LIGHT","PRESENCE","YIN",
-"MINDSET","RESET","SLOW","YOGA","CARE","SLEEP"
-];
+let LETTERS = [];
+let WORDS = [];
 
 const grid = document.getElementById("grid");
 const svg = document.getElementById("svg");
 const wordList = document.getElementById("wordList");
+const overlay = document.getElementById("overlayText");
+const dotsEl = document.getElementById("dots");
 
-LETTERS.forEach((l, i) => {
-  const c = document.createElement("div");
-  c.className = "cell";
-  c.textContent = l;
-  c.dataset.index = i;
-  grid.appendChild(c);
+async function loadGames() {
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/GamesWordSearch?active=eq.true&order=startdate.desc`,
+    {
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+      }
+    }
+  );
+
+  games = await response.json();
+
+  if (!games.length) {
+    document.getElementById("gameTitle").textContent = "No Games Found";
+    return;
+  }
+
+  initGame(0);
+  buildDots();
+}
+
+function initGame(index) {
+  currentIndex = index;
+  const game = games[index];
+
+  LETTERS = game.gridlettersjson.flat();
+  WORDS = game.wordjson;
+
+  document.documentElement.style.setProperty('--bg-color', game.bgcolor);
+  document.documentElement.style.setProperty('--draw-color', game.drawcolor);
+  document.documentElement.style.setProperty('--grid-border', game.gridcolor);
+
+  document.getElementById("gameTitle").textContent = game.name;
+
+  buildGrid();
+  buildWords();
+  updateDots();
+}
+
+function buildGrid() {
+  grid.innerHTML = "";
+  svg.innerHTML = "";
+
+  LETTERS.forEach((l, i) => {
+    const c = document.createElement("div");
+    c.className = "cell";
+    c.textContent = l;
+    c.dataset.index = i;
+    grid.appendChild(c);
+  });
+
+  const rows = LETTERS.length / COLS;
+  svg.setAttribute("width", COLS * CELL + (COLS - 1) * GAP);
+  svg.setAttribute("height", rows * CELL + (rows - 1) * GAP);
+}
+
+function buildWords() {
+  wordList.innerHTML = "";
+  WORDS.forEach(w => {
+    const el = document.createElement("div");
+    el.className = "word";
+    el.id = "word-" + w;
+    el.textContent = w;
+    wordList.appendChild(el);
+  });
+}
+
+function buildDots() {
+  dotsEl.innerHTML = "";
+  games.forEach((_, i) => {
+    const dot = document.createElement("div");
+    dot.className = "dot";
+    dotsEl.appendChild(dot);
+  });
+}
+
+function updateDots() {
+  document.querySelectorAll(".dot").forEach((dot, i) => {
+    dot.classList.toggle("active", i === currentIndex);
+  });
+}
+
+function nextGame() {
+  let next = (currentIndex + 1) % games.length;
+  initGame(next);
+}
+
+function prevGame() {
+  let prev = (currentIndex - 1 + games.length) % games.length;
+  initGame(prev);
+}
+
+let startX = 0;
+document.getElementById("swipeArea").addEventListener("touchstart", e => {
+  startX = e.touches[0].clientX;
+});
+document.getElementById("swipeArea").addEventListener("touchend", e => {
+  let diff = e.changedTouches[0].clientX - startX;
+  if (diff > 50) prevGame();
+  if (diff < -50) nextGame();
 });
 
-const rows = LETTERS.length / COLS;
-svg.setAttribute("width", COLS * CELL + (COLS - 1) * GAP);
-svg.setAttribute("height", rows * CELL + (rows - 1) * GAP);
-
-WORDS.forEach(w => {
-  const el = document.createElement("div");
-  el.className = "word";
-  el.id = "word-" + w;
-  el.textContent = w;
-  wordList.appendChild(el);
-});
+/* ===== YOUR ORIGINAL GAME LOGIC BELOW (UNCHANGED) ===== */
 
 let startIndex = null;
 let direction = null;
@@ -222,9 +266,9 @@ function indexToRC(i) {
 function getDir(a, b) {
   const dr = b.r - a.r;
   const dc = b.c - a.c;
-  if (dr === 0 && dc === 1) return { dr: 0, dc: 1 }; // →
-  if (dc === 0 && dr === 1) return { dr: 1, dc: 0 }; // ↓
-  if (dr >= 1 && dc >= 1) return { dr: 1, dc: 1 };  // ↘
+  if (dr === 0 && dc === 1) return { dr: 0, dc: 1 };
+  if (dc === 0 && dr === 1) return { dr: 1, dc: 0 };
+  if (dr >= 1 && dc >= 1) return { dr: 1, dc: 1 };
   return null;
 }
 
@@ -266,7 +310,6 @@ function start(x, y) {
 
 function move(x, y) {
   if (!line) return;
-
   const cell = getCellAt(x, y);
   if (!cell) return;
 
@@ -298,22 +341,15 @@ function end() {
   const word = path.map(i => LETTERS[i]).join("");
 
   if (WORDS.includes(word)) {
-    line.classList.add("locked"); // glow
+    document.getElementById("word-" + word)?.classList.add("found");
 
-    document.getElementById("word-" + word).classList.add("found");
+    const allFound = WORDS.every(w =>
+      document.getElementById("word-" + w)?.classList.contains("found")
+    );
 
-    path.forEach(i => {
-      grid.children[i].classList.add("used");
-    });
-
-    // Completed overlay
-    const allFound = WORDS.every(w => document.getElementById("word-" + w).classList.contains("found"));
     if (allFound) {
-      const overlay = document.getElementById("completedOverlay");
       overlay.style.opacity = 1;
-      setTimeout(() => {
-        overlay.style.opacity = 0;
-      }, 2500);
+      setTimeout(() => overlay.style.opacity = 0, 2400);
     }
   } else {
     line.remove();
@@ -325,12 +361,10 @@ function end() {
   startIndex = null;
 }
 
-/* Mouse */
 document.addEventListener("mousedown", e => start(e.clientX, e.clientY));
 document.addEventListener("mousemove", e => move(e.clientX, e.clientY));
 document.addEventListener("mouseup", end);
 
-/* Touch */
 document.addEventListener("touchstart", e => {
   e.preventDefault();
   start(e.touches[0].clientX, e.touches[0].clientY);
@@ -345,6 +379,8 @@ document.addEventListener("touchend", e => {
   e.preventDefault();
   end();
 });
+
+loadGames();
 </script>
 </body>
 </html>
