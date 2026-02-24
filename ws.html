@@ -278,9 +278,10 @@ function indexToRC(i) {
 function getDir(a, b) {
   const dr = b.r - a.r;
   const dc = b.c - a.c;
-  if (dr === 0 && dc === 1) return { dr: 0, dc: 1 };
-  if (dc === 0 && dr === 1) return { dr: 1, dc: 0 };
-  if (dr >= 1 && dc >= 1) return { dr: 1, dc: 1 };
+  if (dr === 0 && dc === 1) return { dr: 0, dc: 1 };   // →
+  if (dc === 0 && dr === 1) return { dr: 1, dc: 0 };   // ↓
+  if (dr >= 1 && dc >= 1) return { dr: 1, dc: 1 };     // ↘
+   if (dr >= 1 && dc <= -1) return { dr: 1, dc: -1 };  // ↙
   return null;
 }
 
