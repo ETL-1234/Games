@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>8 Puzzle – Easy / Flow / Challenge</title>
+
+<!-- Inter font -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    background: #829593;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .level-title {
+    margin-top: 30px;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.25); /* Same as shuffle dot */
+    user-select: none;
+  }
+
+  .board {
+    width: 90vmin;
+    height: 90vmin;
+    position: relative;
+    touch-action: none;
+    margin-bottom: 30px; /* Space below board */
+  }
+
+  .tile {
+    position: absolute;
+    width: calc(100% / 3);
+    height: calc(100% / 3);
+    transition: transform 160ms ease-out, box-shadow 0.5s ease-in-out;
+    overflow: hidden;
+    border-radius: 6px;
+  }
+
+  .tile img {
+    width: 300%;
+    height: 300%;
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .tile.completed {
+    /* Soft glow effect */
+    box-shadow: 0 0 20px 10px rgba(255,255,255,0.3);
+  }
+
+  .shuffle {
+    width: 44px;
+    height: 44px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(4px);
+    margin-bottom: 40px; /* Extra space below dot */
+  }
+</style>
+</head>
+
+<body>
+
+<div class="level-title" id="levelTitle">Easy</div>
+<div class="board" id="board"></div>
+<div class="shuffle" id="shuffle"></div>
+
+<script>
+/* ============ CONFIG ============ */
+const GRID = 3;
+const IMAGE_URL = "https://hkdgqdmxhtnxtcuqfovq.supabase.co/storage/v1/object/public/PlayImages/8PuzzleImage01.png";
+
+// Level → [minMoves, maxMoves] for randomized shuffle
+const LEVELS = {
+  Easy: [10, 12],
+  Flow: [12, 15],
+  Challenge: [15, 20]
+};
+
+const LEVEL_ORDER = ["Easy", "Flow", "Challenge"];
+let currentLevelIndex = 0; // Start on Easy
+/* ================================= */
+
+let board = [];
+let lastEmpty = null;
+
+/* ---------- Helpers ---------- */
+function solvedBoard() {
+  return [...Array(GRID * GRID).keys()];
+}
+
+function neighbors(index) {
+  const r = Math.floor(index / GRID);
+  const c = index % GRID;
+  const n = [];
+  if (r > 0) n.push(index - GRID);
+  if (r < GRID - 1) n.push(index + GRID);
+  if (c > 0) n.push(index - 1);
+  if (c < GRID - 1) n.push(index + 1);
+  return n;
+}
+
+// ---------- Human-friendly shuffle ----------
+function shuffle() {
+  board = solvedBoard();
+  let empty = board.length - 1;
+  lastEmpty = null;
+
+  const [minMoves, maxMoves] = LEVELS[LEVEL_ORDER[currentLevelIndex]];
+  const moves = Math.floor(Math.random() * (maxMoves - minMoves + 1)) + minMoves;
+
+  for (let i = 0; i < moves; i++) {
+    const options = neighbors(empty).filter(n => n !== lastEmpty);
+    const move = options[Math.floor(Math.random() * options.length)];
+    [board[empty], board[move]] = [board[move], board[empty]];
+    lastEmpty = empty;
+    empty = move;
+  }
+
+  // Ensure empty is bottom-right
+  const finalEmptyIndex = board.indexOf(0);
+  if (finalEmptyIndex !== board.length - 1) {
+    [board[finalEmptyIndex], board[board.length - 1]] = [board[board.length - 1], board[finalEmptyIndex]];
+    empty = board.length - 1;
+  }
+
+  // Fix last two tiles if swapped (only relevant for 3x3)
+  const secondLast = board.length - 2;
+  if (board[secondLast] === 7 && board[7] === 8) {
+    [board[secondLast], board[7]] = [board[7], board[secondLast]];
+  }
+
+  render();
+}
+
+// ---------- Swipe movement ----------
+function moveBySwipe(direction) {
+  const e = board.indexOf(0);
+  const r = Math.floor(e / GRID);
+  const c = e % GRID;
+
+  let target = null;
+  if (direction === "up" && r < GRID - 1) target = e + GRID;
+  if (direction === "down" && r > 0) target = e - GRID;
+  if (direction === "left" && c < GRID - 1) target = e + 1;
+  if (direction === "right" && c > 0) target = e - 1;
+
+  if (target === null) return;
+
+  [board[e], board[target]] = [board[target], board[e]];
+  render();
+}
+
+// ---------- Touch handling ----------
+let startX = 0;
+let startY = 0;
+const boardEl = document.getElementById("board");
+
+boardEl.addEventListener("touchstart", e => {
+  startX = e.touches[0].clientX;
+  startY = e.touches[0].clientY;
+});
+
+boardEl.addEventListener("touchend", e => {
+  const dx = e.changedTouches[0].clientX - startX;
+  const dy = e.changedTouches[0].clientY - startY;
+
+  if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
+
+  if (Math.abs(dx) > Math.abs(dy)) {
+    moveBySwipe(dx > 0 ? "right" : "left");
+  } else {
+    moveBySwipe(dy > 0 ? "down" : "up");
+  }
+});
+
+// ---------- Check completion ----------
+function isSolved() {
+  const solved = solvedBoard();
+  return board.every((val, index) => val === solved[index]);
+}
+
+// ---------- Render ----------
+function render() {
+  boardEl.innerHTML = "";
+
+  board.forEach((tile, index) => {
+    if (tile === 0) return;
+
+    const el = document.createElement("div");
+    el.className = "tile";
+
+    const r = Math.floor(index / GRID);
+    const c = index % GRID;
+    el.style.transform = `translate(${c * 100}%, ${r * 100}%)`;
+
+    const img = document.createElement("img");
+    const ir = Math.floor((tile - 1) / GRID);
+    const ic = (tile - 1) % GRID;
+    img.src = IMAGE_URL;
+    img.style.left = `-${ic * 100}%`;
+    img.style.top = `-${ir * 100}%`;
+
+    el.appendChild(img);
+    boardEl.appendChild(el);
+  });
+
+  // Update header title
+  document.getElementById("levelTitle").textContent = LEVEL_ORDER[currentLevelIndex];
+
+  // Animate completion glow
+  if (isSolved()) {
+    const tiles = document.querySelectorAll(".tile");
+    tiles.forEach((tile, i) => {
+      setTimeout(() => {
+        tile.classList.add("completed");
+        setTimeout(() => tile.classList.remove("completed"), 800); // glow fade out
+      }, i * 50); // stagger for subtle effect
+    });
+  }
+}
+
+// ---------- Shuffle dot cycles levels ----------
+document.getElementById("shuffle").addEventListener("click", () => {
+  currentLevelIndex = (currentLevelIndex + 1) % LEVEL_ORDER.length;
+  shuffle();
+});
+
+// ---------- Init ----------
+shuffle();
+</script>
+
+</body>
+</html>
