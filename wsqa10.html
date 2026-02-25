@@ -222,11 +222,12 @@ function buildGrid() {
 
 function buildWords() {
   wordList.innerHTML = "";
-  WORDS.forEach(w => {
+
+  WORDS.forEach((w, index) => {
     const el = document.createElement("div");
     el.className = "word";
-    el.id = "word-" + w;
-    el.textContent = w;
+    el.id = "word-" + w.answer; // IMPORTANT: still link to answer
+    el.textContent = (index + 1) + ". " + w.question;
     wordList.appendChild(el);
   });
 }
