@@ -356,7 +356,7 @@ function end() {
 
   const word = path.map(i => LETTERS[i]).join("");
 
-  if (WORDS.includes(word)) {
+  if (ANSWERS.includes(word)) {
     document.getElementById("word-" + word)?.classList.add("found");
 
     const allFound = WORDS.every(w =>
