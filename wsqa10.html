@@ -359,9 +359,9 @@ function end() {
   if (ANSWERS.includes(word)) {
     document.getElementById("word-" + word)?.classList.add("found");
 
-    const allFound = WORDS.every(w =>
-      document.getElementById("word-" + w)?.classList.contains("found")
-    );
+  const allFound = ANSWERS.every(a =>
+  document.getElementById("word-" + a)?.classList.contains("found")
+);
 
     if (allFound) {
       overlay.style.opacity = 1;
