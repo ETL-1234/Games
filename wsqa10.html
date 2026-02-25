@@ -189,7 +189,8 @@ function initGame(index) {
   const game = games[index];
 
   LETTERS = game.gridlettersjson.flat();
-  WORDS = game.wordjson;
+  WORDS = game.wordjson; // array of objects
+  ANSWERS = WORDS.map(w => w.answer);
 
   document.documentElement.style.setProperty('--bg-color', game.bgcolor);
   document.documentElement.style.setProperty('--draw-color', game.drawcolor);
