@@ -1,102 +1,196 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-<title>8 Puzzle – Easy / Flow / Challenge</title>
-
-<!-- Inter font -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-  body {
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    background: #829593;
-    font-family: 'Inter', sans-serif;
-  }
+:root {
+  --bg-color: #829593;
+}
 
-  .level-title {
-    margin-top: 30px;
-    margin-bottom: 20px;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: rgba(255,255,255,0.25); /* Same as shuffle dot */
-    user-select: none;
-  }
+body {
+  margin: 0;
+  font-family: "Inter", Arial, sans-serif;
+  background: var(--bg-color);
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+}
 
-  .board {
-    width: 90vmin;
-    height: 90vmin;
-    position: relative;
-    touch-action: none;
-    margin-bottom: 30px; /* Space below board */
-  }
+.app {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-  .tile {
-    position: absolute;
-    width: calc(100% / 3);
-    height: calc(100% / 3);
-    transition: transform 160ms ease-out, box-shadow 0.5s ease-in-out;
-    overflow: hidden;
-    border-radius: 6px;
-  }
+/* ===== TOP DOTS ===== */
+.dots {
+  display: flex;
+  gap: 6px;
+  margin-top: 18px;
+  margin-bottom: 12px;
+}
 
-  .tile img {
-    width: 300%;
-    height: 300%;
-    position: absolute;
-    pointer-events: none;
-  }
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.25);
+}
 
-  .tile.completed {
-    /* Soft glow effect */
-    box-shadow: 0 0 20px 10px rgba(255,255,255,0.3);
-  }
+.dot.active {
+  background: rgba(0,0,0,0.65);
+}
 
-  .shuffle {
-    width: 44px;
-    height: 44px;
-    border-radius: 22px;
-    background: rgba(255, 255, 255, 0.25);
-    backdrop-filter: blur(4px);
-    margin-bottom: 40px; /* Extra space below dot */
-  }
+/* ===== TITLE ===== */
+h1 {
+  margin: 0 0 16px 0;
+  font-size: 20px;
+}
+
+/* ===== BOARD ===== */
+.board {
+  width: 90vmin;
+  height: 90vmin;
+  position: relative;
+  touch-action: none;
+}
+
+.tile {
+  position: absolute;
+  width: calc(100% / 3);
+  height: calc(100% / 3);
+  transition: transform 160ms ease-out;
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+.tile img {
+  width: 300%;
+  height: 300%;
+  position: absolute;
+  pointer-events: none;
+}
+
+.shuffle {
+  width: 44px;
+  height: 44px;
+  border-radius: 22px;
+  background: rgba(255,255,255,0.3);
+  margin: 20px 0 30px 0;
+}
 </style>
 </head>
 
 <body>
+<div class="app">
 
-<div class="level-title" id="levelTitle">Easy</div>
+<div class="dots" id="dots"></div>
+<h1 id="puzzleTitle">Loading...</h1>
 <div class="board" id="board"></div>
 <div class="shuffle" id="shuffle"></div>
 
+</div>
+
 <script>
-/* ============ CONFIG ============ */
+/* ================= SUPABASE ================= */
+
+const SUPABASE_URL = "https://YOUR_PROJECT_ID.supabase.co";
+const SUPABASE_ANON_KEY = "YOUR_PUBLIC_ANON_KEY";
+
+let puzzles = [];
+let currentIndex = 0;
+let IMAGE_URL = "";
+
+/* ================= LOAD PUZZLES ================= */
+
+async function loadPuzzles() {
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/puzzle?type=eq.3X3&active=eq.true&limit=5`,
+    {
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+      }
+    }
+  );
+
+  puzzles = await response.json();
+
+  if (!puzzles.length) {
+    document.getElementById("puzzleTitle").textContent = "No Puzzles Found";
+    return;
+  }
+
+  buildDots();
+  initPuzzle(0);
+}
+
+/* ================= INIT PUZZLE ================= */
+
+function initPuzzle(index) {
+  currentIndex = index;
+  const puzzle = puzzles[index];
+
+  IMAGE_URL = puzzle.imageurl;
+
+  document.documentElement.style.setProperty('--bg-color', puzzle.bgcolor);
+  document.getElementById("puzzleTitle").textContent = puzzle.name;
+
+  updateDots();
+  shuffle();
+}
+
+/* ================= DOTS ================= */
+
+function buildDots() {
+  const dotsEl = document.getElementById("dots");
+  dotsEl.innerHTML = "";
+  puzzles.forEach(() => {
+    const dot = document.createElement("div");
+    dot.className = "dot";
+    dotsEl.appendChild(dot);
+  });
+}
+
+function updateDots() {
+  document.querySelectorAll(".dot").forEach((dot, i) => {
+    dot.classList.toggle("active", i === currentIndex);
+  });
+}
+
+/* ================= SWIPE BETWEEN PUZZLES ================= */
+
+let startX = 0;
+
+document.body.addEventListener("touchstart", e => {
+  startX = e.touches[0].clientX;
+});
+
+document.body.addEventListener("touchend", e => {
+  let diff = e.changedTouches[0].clientX - startX;
+
+  if (diff > 60) prevPuzzle();
+  if (diff < -60) nextPuzzle();
+});
+
+function nextPuzzle() {
+  let next = (currentIndex + 1) % puzzles.length;
+  initPuzzle(next);
+}
+
+function prevPuzzle() {
+  let prev = (currentIndex - 1 + puzzles.length) % puzzles.length;
+  initPuzzle(prev);
+}
+
+/* ================= PUZZLE LOGIC ================= */
+
 const GRID = 3;
-const IMAGE_URL = "https://hkdgqdmxhtnxtcuqfovq.supabase.co/storage/v1/object/public/PlayImages/8PuzzleImage01.png";
-
-// Level → [minMoves, maxMoves] for randomized shuffle
-const LEVELS = {
-  Easy: [10, 12],
-  Flow: [12, 15],
-  Challenge: [15, 20]
-};
-
-const LEVEL_ORDER = ["Easy", "Flow", "Challenge"];
-let currentLevelIndex = 0; // Start on Easy
-/* ================================= */
-
 let board = [];
-let lastEmpty = null;
 
-/* ---------- Helpers ---------- */
 function solvedBoard() {
   return [...Array(GRID * GRID).keys()];
 }
@@ -112,40 +206,20 @@ function neighbors(index) {
   return n;
 }
 
-// ---------- Human-friendly shuffle ----------
 function shuffle() {
   board = solvedBoard();
   let empty = board.length - 1;
-  lastEmpty = null;
 
-  const [minMoves, maxMoves] = LEVELS[LEVEL_ORDER[currentLevelIndex]];
-  const moves = Math.floor(Math.random() * (maxMoves - minMoves + 1)) + minMoves;
-
-  for (let i = 0; i < moves; i++) {
-    const options = neighbors(empty).filter(n => n !== lastEmpty);
+  for (let i = 0; i < 15; i++) {
+    const options = neighbors(empty);
     const move = options[Math.floor(Math.random() * options.length)];
     [board[empty], board[move]] = [board[move], board[empty]];
-    lastEmpty = empty;
     empty = move;
-  }
-
-  // Ensure empty is bottom-right
-  const finalEmptyIndex = board.indexOf(0);
-  if (finalEmptyIndex !== board.length - 1) {
-    [board[finalEmptyIndex], board[board.length - 1]] = [board[board.length - 1], board[finalEmptyIndex]];
-    empty = board.length - 1;
-  }
-
-  // Fix last two tiles if swapped (only relevant for 3x3)
-  const secondLast = board.length - 2;
-  if (board[secondLast] === 7 && board[7] === 8) {
-    [board[secondLast], board[7]] = [board[7], board[secondLast]];
   }
 
   render();
 }
 
-// ---------- Swipe movement ----------
 function moveBySwipe(direction) {
   const e = board.indexOf(0);
   const r = Math.floor(e / GRID);
@@ -163,36 +237,18 @@ function moveBySwipe(direction) {
   render();
 }
 
-// ---------- Touch handling ----------
-let startX = 0;
-let startY = 0;
 const boardEl = document.getElementById("board");
 
 boardEl.addEventListener("touchstart", e => {
   startX = e.touches[0].clientX;
-  startY = e.touches[0].clientY;
 });
 
 boardEl.addEventListener("touchend", e => {
   const dx = e.changedTouches[0].clientX - startX;
-  const dy = e.changedTouches[0].clientY - startY;
-
-  if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
-
-  if (Math.abs(dx) > Math.abs(dy)) {
-    moveBySwipe(dx > 0 ? "right" : "left");
-  } else {
-    moveBySwipe(dy > 0 ? "down" : "up");
-  }
+  if (Math.abs(dx) < 30) return;
+  moveBySwipe(dx > 0 ? "right" : "left");
 });
 
-// ---------- Check completion ----------
-function isSolved() {
-  const solved = solvedBoard();
-  return board.every((val, index) => val === solved[index]);
-}
-
-// ---------- Render ----------
 function render() {
   boardEl.innerHTML = "";
 
@@ -216,31 +272,11 @@ function render() {
     el.appendChild(img);
     boardEl.appendChild(el);
   });
-
-  // Update header title
-  document.getElementById("levelTitle").textContent = LEVEL_ORDER[currentLevelIndex];
-
-  // Animate completion glow
-  if (isSolved()) {
-    const tiles = document.querySelectorAll(".tile");
-    tiles.forEach((tile, i) => {
-      setTimeout(() => {
-        tile.classList.add("completed");
-        setTimeout(() => tile.classList.remove("completed"), 800); // glow fade out
-      }, i * 50); // stagger for subtle effect
-    });
-  }
 }
 
-// ---------- Shuffle dot cycles levels ----------
-document.getElementById("shuffle").addEventListener("click", () => {
-  currentLevelIndex = (currentLevelIndex + 1) % LEVEL_ORDER.length;
-  shuffle();
-});
+document.getElementById("shuffle").addEventListener("click", shuffle);
 
-// ---------- Init ----------
-shuffle();
+loadPuzzles();
 </script>
-
 </body>
 </html>
