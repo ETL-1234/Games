@@ -350,6 +350,18 @@ function render() {
   });
 }
 
+  // Animate completion glow
+  if (isSolved()) {
+    const tiles = document.querySelectorAll(".tile");
+    tiles.forEach((tile, i) => {
+      setTimeout(() => {
+        tile.classList.add("completed");
+        setTimeout(() => tile.classList.remove("completed"), 800); // glow fade out
+      }, i * 50); // stagger for subtle effect
+    });
+  }
+}
+
 loadPuzzles();
 
 </script>
