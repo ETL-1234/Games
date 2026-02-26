@@ -262,10 +262,23 @@ function shuffle() {
     lastEmpty = empty;
     empty = move;
   }
+// Ensure empty is bottom-right
+  const finalEmptyIndex = board.indexOf(0);
+  if (finalEmptyIndex !== board.length - 1) {
+    [board[finalEmptyIndex], board[board.length - 1]] = [board[board.length - 1], board[finalEmptyIndex]];
+    empty = board.length - 1;
+  }
 
+    // Fix last two tiles if swapped (only relevant for 3x3)
+  const secondLast = board.length - 2;
+  if (board[secondLast] === 7 && board[7] === 8) {
+    [board[secondLast], board[7]] = [board[7], board[secondLast]];
+  }
+  
   render();
 }
-
+  
+// ---------- Swipe movement ----------
 function moveBySwipe(direction) {
   const e = board.indexOf(0);
   const r = Math.floor(e / GRID);
@@ -282,7 +295,8 @@ function moveBySwipe(direction) {
   [board[e], board[target]] = [board[target], board[e]];
   render();
 }
-
+  
+// ---------- Touch handling ----------
 let startX = 0;
 let startY = 0;
 const boardEl = document.getElementById("board");
@@ -305,6 +319,7 @@ boardEl.addEventListener("touchend", e => {
   }
 });
 
+  // ---------- Check completion ----------
 function isSolved() {
   const solved = solvedBoard();
   return board.every((val, index) => val === solved[index]);
