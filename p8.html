@@ -120,7 +120,7 @@ let IMAGE_URL = "";
 async function loadPuzzles() {
 
   const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/puzzle?type=eq.3X3&active=eq.true&limit=5`,
+   `${SUPABASE_URL}/rest/v1/puzzle?select=id,type,active,imageurl&type=eq.3X3&active=eq.true&limit=5`,
     {
       headers: {
         apikey: SUPABASE_ANON_KEY,
