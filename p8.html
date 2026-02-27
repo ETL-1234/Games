@@ -94,8 +94,14 @@
 
 .puzzle-slide {
   min-width: 100vw;
-  height: 100vh; /* <- add this */
+  height: 100vh; /* fill viewport */
   box-sizing: border-box;
+
+  display: flex;           /* make slide flex container */
+  flex-direction: column;  /* stack puzzle and dots */
+  justify-content: center; /* vertical centering */
+  align-items: center;     /* horizontal centering */
+  background: inherit;     /* use puzzle bg color */
 }
 
   #paginationDots {
