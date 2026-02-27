@@ -157,24 +157,6 @@ function neighbors(index) {
   return n;
 }
 
-/* ---------- Swipe movement ---------- */
-function moveBySwipe(direction) {
-  const e = board.indexOf(0);
-  const r = Math.floor(e / GRID);
-  const c = e % GRID;
-
-  let target = null;
-  if (direction === "up" && r < GRID - 1) target = e + GRID;
-  if (direction === "down" && r > 0) target = e - GRID;
-  if (direction === "left" && c < GRID - 1) target = e + 1;
-  if (direction === "right" && c > 0) target = e - 1;
-
-  if (target === null) return;
-
-  [board[e], board[target]] = [board[target], board[e]];
-  render();
-}
-
 /* ---------- Touch handling ---------- */
 let startX = 0;
 let startY = 0;
