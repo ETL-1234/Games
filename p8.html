@@ -419,10 +419,12 @@ function updateDots() {
 async function init() {
   await fetchPuzzleImage();
   renderPuzzles();
-  // ensure slides are rendered before setup
-  requestAnimationFrame(() => {
-    setupSlider();
-  });
+
+  // ensure the track has slides before setup
+  const track = document.getElementById("puzzleTrack");
+  totalSlides = track.children.length;
+
+  setupSlider();
 }
 
 init();
