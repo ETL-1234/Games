@@ -424,38 +424,26 @@ function createPuzzleBoard(boardEl, imageUrl) {
 }
 
 function createDots() {
-  document.querySelectorAll(".paginationDots").forEach(dotsContainer => {
-    dotsContainer.innerHTML = "";
-    for (let i = 0; i < totalSlides - 1; i++) { // exclude clone slide
-      const dot = document.createElement("span");
-      dot.classList.add("dot");
-      if (i === 0) dot.classList.add("active-dot");
-      dot.addEventListener("click", () => {
-        currentIndex = i;
-        updateSlider();
-      });
-      dotsContainer.appendChild(dot);
-    }
-  });
+  const dotsContainer = document.getElementById("paginationDots");
+  dotsContainer.innerHTML = "";
+  for (let i = 0; i < totalSlides - 1; i++) { // exclude clone
+    const dot = document.createElement("span");
+    dot.classList.add("dot");
+    dotsContainer.appendChild(dot);
+
+    dot.addEventListener("click", () => {
+      currentIndex = i;
+      updateSlider();
+    });
+  }
+  updateDots();
 }
  
 function updateDots() {
-  // Get the current slide
-  const currentSlide = document.querySelectorAll(".puzzle-slide")[currentIndex];
-  if (!currentSlide) return;
-
-  // Find the dots container inside that slide
-  const dotsContainer = currentSlide.querySelector(".paginationDots");
-  if (!dotsContainer) return;
-
-  // Reset all dots in this container
-  const dots = dotsContainer.querySelectorAll(".dot");
-  dots.forEach(dot => dot.classList.remove("active-dot"));
-
-  // Highlight the correct dot
-  dots[0].classList.add("active-dot"); // if you have only 1 dot per slide, else use proper index
+  const dots = document.querySelectorAll("#paginationDots .dot");
+  dots.forEach((dot, i) => dot.classList.remove("active-dot"));
+  dots[currentIndex % (totalSlides - 1)].classList.add("active-dot");
 }
-
 /* ---------- INIT ---------- */
 async function init() {
   await fetchPuzzleImage();
