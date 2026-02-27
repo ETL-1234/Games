@@ -111,18 +111,12 @@ async function fetchPuzzleImage() {
 
     const data = await res.json();
 
-   if (data && data.length > 0) {
-  const puzzle = data[0];
-
-  IMAGE_URL = puzzle.imageurl;
-  PUZZLE_NAME = puzzle.name || "Puzzle";
-  BG_COLOR = puzzle.bgcolor || "#829593";
-
-  // Apply background color
-  document.body.style.background = BG_COLOR;
-
-  // Update title
-  document.getElementById("levelTitle").textContent = PUZZLE_NAME;
+  if (data && data.length > 0) {
+  PUZZLES = data;
+  console.log("Loaded puzzles:", PUZZLES);
+} else {
+  throw new Error("No active puzzles found.");
+}
 
   console.log("Puzzle loaded:", puzzle);
 } else {
