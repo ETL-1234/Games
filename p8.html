@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<title>8 Puzzle</title>
+<title>8 Puzzle – Easy / Flow / Challenge</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
@@ -17,32 +17,17 @@
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
+    background: #829593;
     font-family: 'Inter', sans-serif;
   }
 
-  /* ===== DOTS ===== */
-  .dots {
-    display: flex;
-    gap: 6px;
-    margin-top: 20px;
-  }
-
-  .dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: rgba(0,0,0,0.25);
-  }
-
-  .dot.active {
-    background: rgba(0,0,0,0.65);
-  }
-
-  /* ===== TITLE ===== */
-  .puzzle-name {
-    margin: 14px 0 20px 0;
-    font-size: 20px;
+  .level-title {
+    margin-top: 30px;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
     font-weight: 600;
+    color: rgba(255,255,255,0.25);
+    user-select: none;
   }
 
   .board {
@@ -69,7 +54,6 @@
     pointer-events: none;
   }
 
-     /* Soft glow effect */
   .tile.completed {
     box-shadow: 0 0 20px 10px rgba(255,255,255,0.3);
   }
@@ -80,155 +64,24 @@
     border-radius: 22px;
     background: rgba(255, 255, 255, 0.25);
     backdrop-filter: blur(4px);
-    margin-bottom: 40px; /* Extra space below dot */
-  }
-
-  /* ===== LEVEL BUTTONS ===== */
-  .level-buttons {
-    display: flex;
-    gap: 12px;
     margin-bottom: 40px;
   }
-
-  .level-btn {
-    padding: 8px 16px;
-    border-radius: 20px;
-    border: none;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-  }
-
 </style>
 </head>
 
 <body>
 
-<div class="dots" id="dots"></div>
-<div class="puzzle-name" id="puzzleName">Loading...</div>
-
+<div class="level-title" id="levelTitle">Loading...</div>
 <div class="board" id="board"></div>
 <div class="shuffle" id="shuffle"></div>
 
-<div class="level-buttons">
-  <button class="level-btn" data-level="0">Easy</button>
-  <button class="level-btn" data-level="1">Flow</button>
-  <button class="level-btn" data-level="2">Challenge</button>
-</div>
-
 <script>
-
-/* ================= SUPABASE ================= */
-
+/* ============ SUPABASE CONFIG ============ */
 const SUPABASE_URL = "https://tppyzexttkuvcobbbmaz.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_VZiTsc0JGVx6tVf2Zu-9uQ_-FwjGpQW";
 
-let puzzles = [];
-let currentPuzzleIndex = 0;
-let IMAGE_URL = "";
-
-/* ================= FETCH DATA ================= */
-
-async function loadPuzzles() {
-
-  const res = await fetch(
-   `${SUPABASE_URL}/rest/v1/puzzle?select=id,type,active,imageurl&type=eq.3X3&active=eq.true&limit=5`,
-    {
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`
-      }
-    }
-  );
-
-  puzzles = await res.json();
-
-  if (!puzzles.length) {
-    document.getElementById("puzzleName").textContent = "No puzzles found";
-    return;
-  }
-
-  buildDots();
-  initPuzzle(0);
-}
-
-/* ================= INIT PUZZLE ================= */
-
-function initPuzzle(index) {
-
-  currentPuzzleIndex = index;
-  const puzzle = puzzles[index];
-
-  IMAGE_URL = puzzle.imageurl;
-
-  document.body.style.background = puzzle.bgcolor;
-  document.getElementById("puzzleName").textContent = puzzle.name;
-
-  // Apply button colors
-  document.querySelectorAll(".level-btn").forEach(btn => {
-    btn.style.background = puzzle.buttonbgcolor;
-    btn.style.color = puzzle.buttonfontcolor;
-  });
-
-  updateDots();
-  shuffle(); // uses your original shuffle
-}
-
-/* ================= DOTS ================= */
-
-function buildDots() {
-  const dots = document.getElementById("dots");
-  dots.innerHTML = "";
-
-  puzzles.forEach((_, i) => {
-    const d = document.createElement("div");
-    d.className = "dot";
-    dots.appendChild(d);
-  });
-}
-
-function updateDots() {
-  document.querySelectorAll(".dot").forEach((dot, i) => {
-    dot.classList.toggle("active", i === currentPuzzleIndex);
-  });
-}
-
-/* ================= SWIPE BETWEEN PUZZLES ================= */
-
-let swipeStartX = 0;
-
-document.addEventListener("touchstart", e => {
-  swipeStartX = e.touches[0].clientX;
-});
-
-document.addEventListener("touchend", e => {
-  let diff = e.changedTouches[0].clientX - swipeStartX;
-
-  if (diff > 60) prevPuzzle();
-  if (diff < -60) nextPuzzle();
-});
-
-function nextPuzzle() {
-  let next = (currentPuzzleIndex + 1) % puzzles.length;
-  initPuzzle(next);
-}
-
-function prevPuzzle() {
-  let prev = (currentPuzzleIndex - 1 + puzzles.length) % puzzles.length;
-  initPuzzle(prev);
-}
-
-/* ================= LEVEL BUTTON CLICK ================= */
-
-document.querySelectorAll(".level-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    currentLevelIndex = Number(btn.dataset.level);
-    shuffle();
-  });
-});
-
-
-/* ================= GAME CODE ================= */
+let IMAGE_URL = null; // will be set from Supabase
+/* ========================================= */
 
 const GRID = 3;
 
@@ -244,6 +97,36 @@ let currentLevelIndex = 0;
 let board = [];
 let lastEmpty = null;
 
+/* ---------- FETCH IMAGE FROM SUPABASE ---------- */
+async function fetchPuzzleImage() {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/puzzle?select=id,type,active,imageurl&type=eq.3X3&active=eq.true`,
+      {
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+        }
+      }
+    );
+
+    const data = await res.json();
+
+    if (data && data.length > 0 && data[0].imageurl) {
+      IMAGE_URL = data[0].imageurl;
+      console.log("Puzzle image loaded:", IMAGE_URL);
+    } else {
+      throw new Error("No active puzzle image found.");
+    }
+  } catch (err) {
+    console.error("Error loading puzzle image:", err);
+
+    // Optional fallback image
+    IMAGE_URL = "https://via.placeholder.com/600";
+  }
+}
+
+/* ---------- Helpers ---------- */
 function solvedBoard() {
   return [...Array(GRID * GRID).keys()];
 }
@@ -259,6 +142,7 @@ function neighbors(index) {
   return n;
 }
 
+/* ---------- Shuffle ---------- */
 function shuffle() {
   board = solvedBoard();
   let empty = board.length - 1;
@@ -274,23 +158,11 @@ function shuffle() {
     lastEmpty = empty;
     empty = move;
   }
-// Ensure empty is bottom-right
-  const finalEmptyIndex = board.indexOf(0);
-  if (finalEmptyIndex !== board.length - 1) {
-    [board[finalEmptyIndex], board[board.length - 1]] = [board[board.length - 1], board[finalEmptyIndex]];
-    empty = board.length - 1;
-  }
 
-    // Fix last two tiles if swapped (only relevant for 3x3)
-  const secondLast = board.length - 2;
-  if (board[secondLast] === 7 && board[7] === 8) {
-    [board[secondLast], board[7]] = [board[7], board[secondLast]];
-  }
-  
   render();
 }
-  
-// ---------- Swipe movement ----------
+
+/* ---------- Swipe movement ---------- */
 function moveBySwipe(direction) {
   const e = board.indexOf(0);
   const r = Math.floor(e / GRID);
@@ -307,8 +179,8 @@ function moveBySwipe(direction) {
   [board[e], board[target]] = [board[target], board[e]];
   render();
 }
-  
-// ---------- Touch handling ----------
+
+/* ---------- Touch handling ---------- */
 let startX = 0;
 let startY = 0;
 const boardEl = document.getElementById("board");
@@ -331,12 +203,13 @@ boardEl.addEventListener("touchend", e => {
   }
 });
 
-  // ---------- Check completion ----------
+/* ---------- Check completion ---------- */
 function isSolved() {
   const solved = solvedBoard();
   return board.every((val, index) => val === solved[index]);
 }
 
+/* ---------- Render ---------- */
 function render() {
   boardEl.innerHTML = "";
 
@@ -353,6 +226,7 @@ function render() {
     const img = document.createElement("img");
     const ir = Math.floor((tile - 1) / GRID);
     const ic = (tile - 1) % GRID;
+
     img.src = IMAGE_URL;
     img.style.left = `-${ic * 100}%`;
     img.style.top = `-${ir * 100}%`;
@@ -360,22 +234,34 @@ function render() {
     el.appendChild(img);
     boardEl.appendChild(el);
   });
-}
 
-  // Animate completion glow
+  document.getElementById("levelTitle").textContent =
+    LEVEL_ORDER[currentLevelIndex];
+
   if (isSolved()) {
     const tiles = document.querySelectorAll(".tile");
     tiles.forEach((tile, i) => {
       setTimeout(() => {
         tile.classList.add("completed");
-        setTimeout(() => tile.classList.remove("completed"), 800); // glow fade out
-      }, i * 50); // stagger for subtle effect
+        setTimeout(() => tile.classList.remove("completed"), 800);
+      }, i * 50);
     });
   }
 }
 
-loadPuzzles();
+/* ---------- Shuffle dot ---------- */
+document.getElementById("shuffle").addEventListener("click", () => {
+  currentLevelIndex = (currentLevelIndex + 1) % LEVEL_ORDER.length;
+  shuffle();
+});
 
+/* ---------- INIT ---------- */
+async function init() {
+  await fetchPuzzleImage();
+  shuffle();
+}
+
+init();
 </script>
 
 </body>
