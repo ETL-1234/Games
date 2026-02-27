@@ -433,20 +433,20 @@ function createPuzzleBoard(boardEl, imageUrl) {
   shuffleBoard();
 }
 
-  function createDots() {
-  const dotsContainer = document.getElementById("paginationDots");
-  dotsContainer.innerHTML = "";
-
-  for (let i = 0; i < totalSlides; i++) {
-    const dot = document.createElement("span");
-    dot.classList.add("dot");
-    if (i === 0) dot.classList.add("active-dot");
-    dot.addEventListener("click", () => {
-      currentIndex = i;
-      updateSlider();
-    });
-    dotsContainer.appendChild(dot);
-  }
+function createDots() {
+  document.querySelectorAll(".paginationDots").forEach(dotsContainer => {
+    dotsContainer.innerHTML = "";
+    for (let i = 0; i < totalSlides - 1; i++) { // exclude clone slide
+      const dot = document.createElement("span");
+      dot.classList.add("dot");
+      if (i === 0) dot.classList.add("active-dot");
+      dot.addEventListener("click", () => {
+        currentIndex = i;
+        updateSlider();
+      });
+      dotsContainer.appendChild(dot);
+    }
+  });
 }
 
 function updateDots() {
