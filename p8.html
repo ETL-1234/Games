@@ -440,9 +440,20 @@ function createDots() {
 }
  
 function updateDots() {
-  const dots = document.querySelectorAll(".dot");
+  // Get the current slide
+  const currentSlide = document.querySelectorAll(".puzzle-slide")[currentIndex];
+  if (!currentSlide) return;
+
+  // Find the dots container inside that slide
+  const dotsContainer = currentSlide.querySelector(".paginationDots");
+  if (!dotsContainer) return;
+
+  // Reset all dots in this container
+  const dots = dotsContainer.querySelectorAll(".dot");
   dots.forEach(dot => dot.classList.remove("active-dot"));
-  dots[currentIndex].classList.add("active-dot");
+
+  // Highlight the correct dot
+  dots[0].classList.add("active-dot"); // if you have only 1 dot per slide, else use proper index
 }
 
 /* ---------- INIT ---------- */
