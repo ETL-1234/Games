@@ -179,17 +179,6 @@ async function fetchPuzzleImage() {
 
   
 /* ---------- Helpers ---------- */
-function neighbors(index) {
-  const r = Math.floor(index / GRID);
-  const c = index % GRID;
-  const n = [];
-  if (r > 0) n.push(index - GRID);
-  if (r < GRID - 1) n.push(index + GRID);
-  if (c > 0) n.push(index - 1);
-  if (c < GRID - 1) n.push(index + 1);
-  return n;
-}
-
 let currentIndex = 0;
 let totalSlides = 0;
 let isSwipingBoard = false;
