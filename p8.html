@@ -94,14 +94,15 @@
 
 .puzzle-slide {
   min-width: 100vw;
-  height: 100vh; /* fill viewport */
+  height: 100vh;
   box-sizing: border-box;
 
-  display: flex;           /* make slide flex container */
+  display: flex;           /* flex container */
   flex-direction: column;  /* stack puzzle and dots */
-  justify-content: center; /* vertical centering */
+  justify-content: flex-start; /* start at top, allow padding-top to work */
   align-items: center;     /* horizontal centering */
-  background: inherit;     /* use puzzle bg color */
+  background: inherit;     /* inherit puzzle bg color */
+  padding-top: 60px;       /* move puzzle down from top */
 }
 
   #paginationDots {
