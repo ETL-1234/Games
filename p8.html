@@ -179,10 +179,6 @@ async function fetchPuzzleImage() {
 
   
 /* ---------- Helpers ---------- */
-function solvedBoard() {
-  return [...Array(GRID * GRID).keys()];
-}
-
 function neighbors(index) {
   const r = Math.floor(index / GRID);
   const c = index % GRID;
