@@ -74,6 +74,15 @@
     box-shadow: 0 0 20px 10px rgba(255,255,255,0.3);
   }
 
+  .shuffle {
+    width: 44px;
+    height: 44px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(4px);
+    margin-bottom: 40px; /* Extra space below dot */
+  }
+
   /* ===== LEVEL BUTTONS ===== */
   .level-buttons {
     display: flex;
@@ -99,6 +108,7 @@
 <div class="puzzle-name" id="puzzleName">Loading...</div>
 
 <div class="board" id="board"></div>
+<div class="shuffle" id="shuffle"></div>
 
 <div class="level-buttons">
   <button class="level-btn" data-level="0">Easy</button>
