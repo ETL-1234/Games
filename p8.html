@@ -250,7 +250,8 @@ function renderPuzzles() {
 
     wrapper.appendChild(title);
     wrapper.appendChild(boardEl);
-    container.appendChild(wrapper);
+    wrapper.classList.add("puzzle-slide");
+container.appendChild(wrapper);
 
     createPuzzleBoard(boardEl, puzzleData.imageurl);
   });
