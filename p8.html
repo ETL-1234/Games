@@ -35,9 +35,10 @@
 
   .board {
   width: 90vmin;
-  height: calc(90vmin - 40px); /* subtract space for title and padding */
+  height: 90vmin;
+  max-height: calc(100vh - 150px); /* leaves room for title + dots */
   position: relative;
-  margin-bottom: 0px;
+  margin-bottom: 20px; /* space below tiles */
 }
 
   .tile {
@@ -69,19 +70,19 @@
 
 .puzzle-wrapper {
   width: 100%;
-  height: 100%;  
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start; /* start content at top */
-  padding-bottom: 40px;        /* space under puzzle so background extends */
-}
+  padding-top: 40px; /* adds space above title */
+  padding-bottom: 80px; /* space below board */
+  }
 
 .puzzle-title {
   font-size: 1.5rem;
   font-weight: 600;
-  margin-top: 20px;       /* new: space above title */
-  margin-bottom: 20px;
+  margin-top: 0px;       /* space above title */
+  margin-bottom: 30px; /* space between title and puzzle board */
   color: white;
 }
 
@@ -114,9 +115,9 @@
 
   #paginationDots {
   text-align: center;
-  margin-top: 30px;
-  padding-top: 30px; 
-  padding-bottom: 30px; /* optional: small padding so dots aren't at screen edge */
+  margin-top: 20px;  /* space from puzzle */
+  margin-bottom: 20px; /* extra space from bottom */
+  padding: 0;
 }
 
 .dot {
