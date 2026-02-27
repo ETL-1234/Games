@@ -172,6 +172,46 @@ function neighbors(index) {
   return n;
 }
 
+  let currentIndex = 0;
+let totalSlides = 0;
+
+function setupSlider() {
+  const track = document.getElementById("puzzleTrack");
+  totalSlides = track.children.length;
+
+  createDots();
+
+  let startX = 0;
+
+  track.addEventListener("touchstart", e => {
+    startX = e.touches[0].clientX;
+  });
+
+  track.addEventListener("touchend", e => {
+    let endX = e.changedTouches[0].clientX;
+    if (startX - endX > 50) nextSlide();
+    if (endX - startX > 50) prevSlide();
+  });
+}
+
+function updateSlider() {
+  const track = document.getElementById("puzzleTrack");
+  track.style.transform = `translateX(-${currentIndex * 100}vw)`;
+  updateDots();
+}
+
+function nextSlide() {
+  currentIndex++;
+  if (currentIndex >= totalSlides) currentIndex = 0; // loop back
+  updateSlider();
+}
+
+function prevSlide() {
+  currentIndex--;
+  if (currentIndex < 0) currentIndex = totalSlides - 1;
+  updateSlider();
+}
+
 /* ---------- Render ---------- */
 function renderPuzzles() {
   const container = document.getElementById("puzzleContainer");
