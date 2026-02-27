@@ -157,12 +157,6 @@ function neighbors(index) {
   return n;
 }
 
-/* ---------- Check completion ---------- */
-function isSolved() {
-  const solved = solvedBoard();
-  return board.every((val, index) => val === solved[index]);
-}
-
 /* ---------- Render ---------- */
 function renderPuzzles() {
   const container = document.getElementById("puzzleContainer");
@@ -189,15 +183,36 @@ function renderPuzzles() {
   });
 }
 
-  
-
 function createPuzzleBoard(boardEl, imageUrl) {
 
   let board = [...Array(GRID * GRID).keys()];
+  let lastEmpty = null;
+
+  const EASY_MOVES = [10, 12];
+
+  function solvedBoard() {
+    return [...Array(GRID * GRID).keys()];
+  }
+
+  function neighbors(index) {
+    const r = Math.floor(index / GRID);
+    const c = index % GRID;
+    const n = [];
+    if (r > 0) n.push(index - GRID);
+    if (r < GRID - 1) n.push(index + GRID);
+    if (c > 0) n.push(index - 1);
+    if (c < GRID - 1) n.push(index + 1);
+    return n;
+  }
+
+  function isSolved() {
+    const solved = solvedBoard();
+    return board.every((val, index) => val === solved[index]);
+  }
 
   function shuffleBoard() {
     let empty = board.length - 1;
-    let lastEmpty = null;
+    lastEmpty = null;
 
     const [minMoves, maxMoves] = EASY_MOVES;
     const moves = Math.floor(Math.random() * (maxMoves - minMoves + 1)) + minMoves;
@@ -210,6 +225,23 @@ function createPuzzleBoard(boardEl, imageUrl) {
       empty = move;
     }
 
+    draw();
+  }
+
+  function moveBySwipe(direction) {
+    const e = board.indexOf(0);
+    const r = Math.floor(e / GRID);
+    const c = e % GRID;
+
+    let target = null;
+    if (direction === "up" && r < GRID - 1) target = e + GRID;
+    if (direction === "down" && r > 0) target = e - GRID;
+    if (direction === "left" && c < GRID - 1) target = e + 1;
+    if (direction === "right" && c > 0) target = e - 1;
+
+    if (target === null) return;
+
+    [board[e], board[target]] = [board[target], board[e]];
     draw();
   }
 
@@ -237,10 +269,43 @@ function createPuzzleBoard(boardEl, imageUrl) {
       el.appendChild(img);
       boardEl.appendChild(el);
     });
+
+    if (isSolved()) {
+      const tiles = boardEl.querySelectorAll(".tile");
+      tiles.forEach((tile, i) => {
+        setTimeout(() => {
+          tile.classList.add("completed");
+          setTimeout(() => tile.classList.remove("completed"), 800);
+        }, i * 50);
+      });
+    }
   }
+
+  // Touch handling PER BOARD
+  let startX = 0;
+  let startY = 0;
+
+  boardEl.addEventListener("touchstart", e => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  });
+
+  boardEl.addEventListener("touchend", e => {
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+
+    if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+      moveBySwipe(dx > 0 ? "right" : "left");
+    } else {
+      moveBySwipe(dy > 0 ? "down" : "up");
+    }
+  });
 
   shuffleBoard();
 }
+
 
 /* ---------- INIT ---------- */
 async function init() {
