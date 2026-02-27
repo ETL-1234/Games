@@ -360,9 +360,12 @@ function createPuzzleBoard(boardEl, imageUrl) {
   let startY = 0;
 
   boardEl.addEventListener("touchstart", e => {
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-  });
+  isSwipingBoard = true;
+  e.stopPropagation();
+
+  startX = e.touches[0].clientX;
+  startY = e.touches[0].clientY;
+});
 
   boardEl.addEventListener("touchend", e => {
     const dx = e.changedTouches[0].clientX - startX;
