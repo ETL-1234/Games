@@ -202,15 +202,17 @@ function setupSlider() {
   let startX = 0;
 
   track.addEventListener("touchstart", e => {
-    startX = e.touches[0].clientX;
-  });
+  if (isSwipingBoard) return;
+  startX = e.touches[0].clientX;
+});
 
-  track.addEventListener("touchend", e => {
-    let endX = e.changedTouches[0].clientX;
-    if (startX - endX > 50) nextSlide();
-    if (endX - startX > 50) prevSlide();
-  });
-}
+track.addEventListener("touchend", e => {
+  if (isSwipingBoard) return;
+
+  let endX = e.changedTouches[0].clientX;
+  if (startX - endX > 50) nextSlide();
+  if (endX - startX > 50) prevSlide();
+});
 
 function updateSlider() {
   const track = document.getElementById("puzzleTrack");
