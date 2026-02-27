@@ -272,6 +272,11 @@ function renderPuzzles() {
     const boardEl = document.createElement("div");
     boardEl.className = "board";
 
+    // add dots container inside this slide
+const dotsContainer = document.createElement("div");
+dotsContainer.className = "paginationDots";
+wrapper.appendChild(dotsContainer);
+
     wrapper.appendChild(title);
     wrapper.appendChild(boardEl);
 
@@ -419,22 +424,23 @@ function createPuzzleBoard(boardEl, imageUrl) {
 }
 
 function createDots() {
-  const dotsContainer = document.getElementById("paginationDots");
-  dotsContainer.innerHTML = "";
-  for (let i = 0; i < totalSlides - 1; i++) { // exclude clone
-    const dot = document.createElement("span");
-    dot.classList.add("dot");
-    if (i === 0) dot.classList.add("active-dot");
-    dot.addEventListener("click", () => {
-      currentIndex = i;
-      updateSlider();
-    });
-    dotsContainer.appendChild(dot);
-  }
+  document.querySelectorAll(".paginationDots").forEach(dotsContainer => {
+    dotsContainer.innerHTML = "";
+    for (let i = 0; i < totalSlides - 1; i++) { // exclude clone slide
+      const dot = document.createElement("span");
+      dot.classList.add("dot");
+      if (i === 0) dot.classList.add("active-dot");
+      dot.addEventListener("click", () => {
+        currentIndex = i;
+        updateSlider();
+      });
+      dotsContainer.appendChild(dot);
+    }
+  });
 }
  
 function updateDots() {
-  const dots = document.querySelectorAll("#paginationDots .dot");
+  const dots = document.querySelectorAll(".dot");
   dots.forEach(dot => dot.classList.remove("active-dot"));
   dots[currentIndex].classList.add("active-dot");
 }
