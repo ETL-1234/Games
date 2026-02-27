@@ -249,6 +249,57 @@ function renderPuzzles() {
   }
 }
 
+function createPuzzleBoard(boardEl, imageUrl) {
+
+  let board = [...Array(GRID * GRID).keys()];
+
+  function shuffleBoard() {
+    let empty = board.length - 1;
+    let lastEmpty = null;
+
+    const [minMoves, maxMoves] = LEVELS[LEVEL_ORDER[currentLevelIndex]];
+    const moves = Math.floor(Math.random() * (maxMoves - minMoves + 1)) + minMoves;
+
+    for (let i = 0; i < moves; i++) {
+      const options = neighbors(empty).filter(n => n !== lastEmpty);
+      const move = options[Math.floor(Math.random() * options.length)];
+      [board[empty], board[move]] = [board[move], board[empty]];
+      lastEmpty = empty;
+      empty = move;
+    }
+
+    draw();
+  }
+
+  function draw() {
+    boardEl.innerHTML = "";
+
+    board.forEach((tile, index) => {
+      if (tile === 0) return;
+
+      const el = document.createElement("div");
+      el.className = "tile";
+
+      const r = Math.floor(index / GRID);
+      const c = index % GRID;
+      el.style.transform = `translate(${c * 100}%, ${r * 100}%)`;
+
+      const img = document.createElement("img");
+      const ir = Math.floor((tile - 1) / GRID);
+      const ic = (tile - 1) % GRID;
+
+      img.src = imageUrl;
+      img.style.left = `-${ic * 100}%`;
+      img.style.top = `-${ir * 100}%`;
+
+      el.appendChild(img);
+      boardEl.appendChild(el);
+    });
+  }
+
+  shuffleBoard();
+}
+
 /* ---------- Shuffle dot ---------- */
 document.getElementById("shuffle").addEventListener("click", () => {
   currentLevelIndex = (currentLevelIndex + 1) % LEVEL_ORDER.length;
