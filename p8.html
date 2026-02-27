@@ -101,7 +101,7 @@ let lastEmpty = null;
 async function fetchPuzzleImage() {
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/puzzle?select=id,type,active,imageurl&type=eq.3X3&active=eq.true`,
+      `${SUPABASE_URL}/rest/v1/puzzle?select=id,type,active,imageurl,name,bgcolor&type=eq.3X3&active=eq.true`,
       {
         headers: {
           apikey: SUPABASE_ANON_KEY,
