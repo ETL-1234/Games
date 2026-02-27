@@ -133,19 +133,17 @@ async function fetchPuzzleImage() {
 
     const data = await res.json();
 
-  if (data && data.length > 0) {
-  PUZZLES = data;
-  console.log("Loaded puzzles:", PUZZLES);
-} else {
-  throw new Error("No active puzzles found.");
-}
+    if (data && data.length > 0) {
+      PUZZLES = data;
+      console.log("Loaded puzzles:", PUZZLES);
+    } else {
+      throw new Error("No active puzzles found.");
+    }
 
-  console.log("Puzzle loaded:", puzzle);
-} else {
-  throw new Error("No active puzzle found.");
-}
   } catch (err) {
-    console.error("Error loading puzzle image:", err);
+    console.error("Error loading puzzles:", err);
+  }
+}
 
     // Optional fallback image
     IMAGE_URL = "https://via.placeholder.com/600";
