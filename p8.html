@@ -184,8 +184,6 @@ function createPuzzleBoard(boardEl, imageUrl) {
   let board = [...Array(GRID * GRID).keys()];
   let lastEmpty = null;
 
-  const EASY_MOVES = [10, 12];
-
   function solvedBoard() {
     return [...Array(GRID * GRID).keys()];
   }
