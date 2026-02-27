@@ -420,7 +420,10 @@ function updateDots() {
 async function init() {
   await fetchPuzzleImage();
   renderPuzzles();
-  setupSlider();
+  // ensure slides are rendered before setup
+  requestAnimationFrame(() => {
+    setupSlider();
+  });
 }
 
 init();
