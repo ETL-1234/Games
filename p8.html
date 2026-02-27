@@ -247,9 +247,6 @@ function render() {
     boardEl.appendChild(el);
   });
 
-  document.getElementById("levelTitle").textContent =
-    LEVEL_ORDER[currentLevelIndex];
-
   if (isSolved()) {
     const tiles = document.querySelectorAll(".tile");
     tiles.forEach((tile, i) => {
