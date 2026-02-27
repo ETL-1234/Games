@@ -299,12 +299,6 @@ function createPuzzleBoard(boardEl, imageUrl) {
   shuffleBoard();
 }
 
-/* ---------- Shuffle dot ---------- */
-document.getElementById("shuffle").addEventListener("click", () => {
-  currentLevelIndex = (currentLevelIndex + 1) % LEVEL_ORDER.length;
-  shuffle();
-});
-
 /* ---------- INIT ---------- */
 async function init() {
   await fetchPuzzleImage();
