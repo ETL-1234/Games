@@ -230,16 +230,7 @@ function renderPuzzles() {
   });
 }
 
-  if (isSolved()) {
-    const tiles = document.querySelectorAll(".tile");
-    tiles.forEach((tile, i) => {
-      setTimeout(() => {
-        tile.classList.add("completed");
-        setTimeout(() => tile.classList.remove("completed"), 800);
-      }, i * 50);
-    });
-  }
-}
+  
 
 function createPuzzleBoard(boardEl, imageUrl) {
 
