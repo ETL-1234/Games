@@ -213,30 +213,30 @@ function isSolved() {
 }
 
 /* ---------- Render ---------- */
-function render() {
-  boardEl.innerHTML = "";
+function renderPuzzles() {
+  const container = document.getElementById("puzzleContainer");
+  container.innerHTML = "";
 
-  board.forEach((tile, index) => {
-    if (tile === 0) return;
+  PUZZLES.forEach((puzzleData, puzzleIndex) => {
 
-    const el = document.createElement("div");
-    el.className = "tile";
+    const wrapper = document.createElement("div");
+    wrapper.className = "puzzle-wrapper";
+    wrapper.style.background = puzzleData.bgcolor || "#829593";
 
-    const r = Math.floor(index / GRID);
-    const c = index % GRID;
-    el.style.transform = `translate(${c * 100}%, ${r * 100}%)`;
+    const title = document.createElement("div");
+    title.className = "puzzle-title";
+    title.textContent = puzzleData.name || "Puzzle";
 
-    const img = document.createElement("img");
-    const ir = Math.floor((tile - 1) / GRID);
-    const ic = (tile - 1) % GRID;
+    const boardEl = document.createElement("div");
+    boardEl.className = "board";
 
-    img.src = IMAGE_URL;
-    img.style.left = `-${ic * 100}%`;
-    img.style.top = `-${ir * 100}%`;
+    wrapper.appendChild(title);
+    wrapper.appendChild(boardEl);
+    container.appendChild(wrapper);
 
-    el.appendChild(img);
-    boardEl.appendChild(el);
+    createPuzzleBoard(boardEl, puzzleData.imageurl);
   });
+}
 
   if (isSolved()) {
     const tiles = document.querySelectorAll(".tile");
