@@ -359,6 +359,27 @@ function createPuzzleBoard(boardEl, imageUrl) {
   shuffleBoard();
 }
 
+  function createDots() {
+  const dotsContainer = document.getElementById("paginationDots");
+  dotsContainer.innerHTML = "";
+
+  for (let i = 0; i < totalSlides; i++) {
+    const dot = document.createElement("span");
+    dot.classList.add("dot");
+    if (i === 0) dot.classList.add("active-dot");
+    dot.addEventListener("click", () => {
+      currentIndex = i;
+      updateSlider();
+    });
+    dotsContainer.appendChild(dot);
+  }
+}
+
+function updateDots() {
+  const dots = document.querySelectorAll(".dot");
+  dots.forEach(dot => dot.classList.remove("active-dot"));
+  dots[currentIndex].classList.add("active-dot");
+}
 
 /* ---------- INIT ---------- */
 async function init() {
