@@ -249,7 +249,7 @@ function createPuzzleBoard(boardEl, imageUrl) {
     let empty = board.length - 1;
     let lastEmpty = null;
 
-    const [minMoves, maxMoves] = LEVELS[LEVEL_ORDER[currentLevelIndex]];
+    const [minMoves, maxMoves] = EASY_MOVES;
     const moves = Math.floor(Math.random() * (maxMoves - minMoves + 1)) + minMoves;
 
     for (let i = 0; i < moves; i++) {
