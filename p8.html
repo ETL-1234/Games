@@ -229,6 +229,12 @@ function renderPuzzles() {
 
   PUZZLES.forEach((puzzleData, puzzleIndex) => {
 
+    // THIS IS THE SLIDER SLIDE
+    const slide = document.createElement("div");
+    slide.className = "puzzle-slide"; // must be direct child of #puzzleTrack
+    slide.style.minWidth = "100vw"; // ensure full width
+
+    // THIS IS THE PUZZLE CONTENT
     const wrapper = document.createElement("div");
     wrapper.className = "puzzle-wrapper";
     wrapper.style.background = puzzleData.bgcolor || "#829593";
@@ -242,8 +248,12 @@ function renderPuzzles() {
 
     wrapper.appendChild(title);
     wrapper.appendChild(boardEl);
-    wrapper.classList.add("puzzle-slide");
-container.appendChild(wrapper);
+
+    // append content wrapper into slide
+    slide.appendChild(wrapper);
+
+    // append slide to track
+    container.appendChild(slide);
 
     createPuzzleBoard(boardEl, puzzleData.imageurl);
   });
