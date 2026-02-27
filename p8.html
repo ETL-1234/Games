@@ -164,26 +164,6 @@ function neighbors(index) {
   return n;
 }
 
-/* ---------- Shuffle ---------- */
-function shuffle() {
-  board = solvedBoard();
-  let empty = board.length - 1;
-  lastEmpty = null;
-
-  const [minMoves, maxMoves] = LEVELS[LEVEL_ORDER[currentLevelIndex]];
-  const moves = Math.floor(Math.random() * (maxMoves - minMoves + 1)) + minMoves;
-
-  for (let i = 0; i < moves; i++) {
-    const options = neighbors(empty).filter(n => n !== lastEmpty);
-    const move = options[Math.floor(Math.random() * options.length)];
-    [board[empty], board[move]] = [board[move], board[empty]];
-    lastEmpty = empty;
-    empty = move;
-  }
-
-  render();
-}
-
 /* ---------- Swipe movement ---------- */
 function moveBySwipe(direction) {
   const e = board.indexOf(0);
