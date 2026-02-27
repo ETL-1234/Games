@@ -30,11 +30,11 @@
   }
 
   .board {
-    width: 90vmin;
-    height: 90vmin;
-    position: relative;
-    margin-bottom: 10px;
-  }
+  width: 90vmin;
+  height: calc(90vmin - 40px); /* subtract space for title and padding */
+  position: relative;
+  margin-bottom: 10px;
+}
 
   .tile {
     position: absolute;
@@ -73,6 +73,7 @@
 .puzzle-title {
   font-size: 1.5rem;
   font-weight: 600;
+  margin-top: 20px;       /* new: space above title */
   margin-bottom: 20px;
   color: white;
 }
@@ -100,7 +101,8 @@
   justify-content: flex-start; /* start at top, allow padding-top to work */
   align-items: center;     /* horizontal centering */
   background: inherit;     /* inherit puzzle bg color */
-  padding-top: 60px;       /* move puzzle down from top */
+  padding-top: 20px;       /* space above title */
+  padding-bottom: 20px;    /* ensures bottom tiles + dots are visible */
 }
 
   #paginationDots {
