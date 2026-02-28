@@ -279,6 +279,7 @@ function renderPuzzles() {
     // add dots container inside this slide
 const dotsContainer = document.createElement("div");
 dotsContainer.className = "paginationDots";
+dotsContainer.style.background = puzzleData.bgcolor || "#829593";
 wrapper.appendChild(dotsContainer);
 
     wrapper.appendChild(title);
