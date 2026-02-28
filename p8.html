@@ -78,7 +78,7 @@
 
 #puzzleTrack {
   display: flex;
-  transition: transform 0.4s ease;
+  transition: transform 400ms ease-in-out;
   width: 100%;
   height: 100vh; /* <- add this */
 }
@@ -86,8 +86,6 @@
 .puzzle-slide {
   min-width: 100vw;
   height: 100%;
-//  box-sizing: border-box;
-
   display: flex;           /* flex container */
   flex-direction: column;  /* stack puzzle and dots */
   justify-content: flex-start; /* start at top, allow padding-top to work */
@@ -95,6 +93,7 @@
   background: inherit;     /* inherit puzzle bg color */
   padding-top: 0px;       /* space above tile */
   padding-bottom: 30px;
+  transition: background-color 400ms ease-in-out;
  }
 
   #paginationDots {
@@ -102,7 +101,7 @@
   margin-top: 0px;  /* space from puzzle */
   margin-bottom: 0px; /* extra space from bottom */
   padding: 0;
-  transition: background 0.4s ease;
+  transition: background-color 400ms ease-in-out;
 }
 
 .dot {
