@@ -101,7 +101,6 @@
   text-align: center;
   margin-top: 20px;  /* space from puzzle */
   margin-bottom: 20px; /* extra space from bottom */
-  background: inherit;     /* inherit puzzle bg color */
   padding: 0;
 }
 
@@ -279,7 +278,6 @@ function renderPuzzles() {
     // add dots container inside this slide
 const dotsContainer = document.createElement("div");
 dotsContainer.className = "paginationDots";
-dotsContainer.style.background = puzzleData.bgcolor || "#829593";
 wrapper.appendChild(dotsContainer);
 
     wrapper.appendChild(title);
