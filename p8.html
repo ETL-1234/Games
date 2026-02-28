@@ -452,13 +452,16 @@ function updateDots() {
 
 function updateDotsBackground() {
   const dotsContainer = document.getElementById("paginationDots");
+  const slides = document.querySelectorAll(".puzzle-slide");
 
-  if (!PUZZLES.length) return;
+  if (!slides.length) return;
 
-  // Get real slide index (ignore clone slide)
-  const realIndex = currentIndex % PUZZLES.length;
+  const realIndex = currentIndex % (totalSlides - 1);
+  const activeSlide = slides[realIndex];
 
-  const bgColor = PUZZLES[realIndex].bgcolor || "#829593";
+  const wrapper = activeSlide.querySelector(".puzzle-wrapper");
+  const bgColor = wrapper.style.background;
+
   dotsContainer.style.background = bgColor;
 }
 
