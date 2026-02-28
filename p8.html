@@ -447,6 +447,20 @@ function updateDots() {
   dots.forEach((dot, i) => dot.classList.remove("active-dot"));
   dots[currentIndex % (totalSlides - 1)].classList.add("active-dot");
 }
+
+function updateDotsBackground() {
+  const dotsContainer = document.getElementById("paginationDots");
+
+  if (!PUZZLES.length) return;
+
+  // Get real slide index (ignore clone slide)
+  const realIndex = currentIndex % PUZZLES.length;
+
+  const bgColor = PUZZLES[realIndex].bgcolor || "#829593";
+  dotsContainer.style.background = bgColor;
+}
+
+  
 /* ---------- INIT ---------- */
 async function init() {
   await fetchPuzzleImage();
