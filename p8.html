@@ -264,6 +264,7 @@ function renderPuzzles() {
     const slide = document.createElement("div");
     slide.className = "puzzle-slide"; // must be direct child of #puzzleTrack
     slide.style.minWidth = "100vw"; // ensure full width
+    slide.style.background = puzzleData.bgcolor || "#829593";
 
     // THIS IS THE PUZZLE CONTENT
     const wrapper = document.createElement("div");
