@@ -187,7 +187,10 @@ function setupSlider() {
   totalSlides = track.children.length; // includes the clone
 
   createDots();
+  track.addEventListener("transitionend", () => {
   updateDotsBackground();
+});
+
 
   let startX = 0;
   let isAnimating = false;
@@ -196,8 +199,7 @@ function setupSlider() {
     track.style.transition = `transform ${duration}s ease`;
     track.style.transform = `translateX(-${currentIndex * 100}vw)`;
     updateDots();
-    updateDotsBackground(); // <-- ADD THIS
-  }
+     }
 
   function nextSlide() {
     if (isAnimating) return;
