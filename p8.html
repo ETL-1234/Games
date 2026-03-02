@@ -148,7 +148,7 @@ const EASY_MOVES = [10, 12];
 async function fetchPuzzleImage() {
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/puzzle?select=id,type,active,imageurl,name,bgcolor&type=eq.3X3&active=eq.true&limit=5`,
+      `${SUPABASE_URL}/rest/v1/puzzle?select=id,type,active,imageurl,name,bgcolor&type=eq.3X3&active=eq.true&limit=3`,
       {
         headers: {
           apikey: SUPABASE_ANON_KEY,
