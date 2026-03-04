@@ -26,10 +26,20 @@ body {
   padding: 20px;
 }
 
-.title {
-  text-align: center;
-  font-size: 24px;
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin: 40px 0 20px;
+}
+
+.title {
+  font-size: 24px;
+}
+
+.moves {
+  font-size: 20px;
+  font-weight: bold;
 }
 
 .grid {
@@ -89,6 +99,27 @@ body {
 
 .dot.active {
   background: rgba(0,0,0,0.7);
+}
+
+  .win-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.win-overlay.hidden {
+  display: none;
+}
+
+.win-text {
+  color: white;
+  font-size: 28px;
+  text-align: center;
+  font-weight: bold;
 }
 </style>
 </head>
