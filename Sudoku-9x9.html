@@ -84,6 +84,28 @@ body {
   transition: opacity 1.2s ease-in-out;
 }
 
+  .win-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.win-overlay.hidden {
+  display: none;
+}
+
+.win-text {
+  color: rgba(255,255,255,0.9);
+  font-size: 42px;
+  text-align: center;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
 .palette {
   display: grid;
   grid-template-columns: repeat(9, 1fr);
@@ -128,27 +150,7 @@ button {
 
 .dot.active { background: rgba(0,0,0,0.6); }
 
-.win-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
-}
 
-.win-overlay.hidden {
-  display: none;
-}
-
-.win-text {
-  color: rgba(255,255,255,0.9);
-  font-size: 42px;
-  text-align: center;
-  font-weight: bold;
-  letter-spacing: 1px;
-}
 </style>
 </head>
 
