@@ -168,6 +168,8 @@ async function initGame(index) {
   );
 
   let images = await imgRes.json();
+  console.log("GAME ID:", game.gameid);
+  console.log("IMAGES RETURNED:", images);
 
   // duplicate + shuffle
   cards = shuffle([...images, ...images]);
