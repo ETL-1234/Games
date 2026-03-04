@@ -164,7 +164,15 @@ let matchedPairs = 0;
 const gridEl = document.getElementById("grid");
 const dotsEl = document.getElementById("dots");
 
+// =======================
+// WIN OVERLAY RESTART
+// =======================
 
+document.getElementById("winOverlay").addEventListener("click", () => {
+  document.getElementById("winOverlay").classList.add("hidden");
+  initGame(currentIndex); // restart same game
+});
+  
 // =======================
 // FETCH GAMES
 // =======================
