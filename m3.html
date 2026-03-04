@@ -201,6 +201,10 @@ async function initGame(index) {
   document.getElementById("gameTitle").textContent = game.title;
 
   updateDots();
+  moves = 0;
+  matchedPairs = 0;
+  updateMoveCounter();
+  document.getElementById("winOverlay").classList.add("hidden");
 
   const imgRes = await fetch(
     `${SUPABASE_URL}/rest/v1/memoryimages?gameid=eq.${game.gameid}`,
