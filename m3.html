@@ -336,6 +336,10 @@ function updateDots() {
   });
 }
 
+  function updateMoveCounter() {
+  document.getElementById("moveCounter").textContent =
+    moves.toString().padStart(2, "0");
+}
 
 // =======================
 // UTIL
