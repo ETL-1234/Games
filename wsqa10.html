@@ -109,27 +109,6 @@ svg {
   pointer-events: none;
 }
 
-  .win-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
-}
-
-.win-overlay.hidden {
-  display: none;
-}
-
-.win-text {
-  color: rgba(255,255,255,0.9);
-  font-size: 42px;
-  text-align: center;
-  font-weight: bold;
-  letter-spacing: 1px;
-}
 .dots {
   display: flex;
   justify-content: center;
@@ -158,14 +137,7 @@ svg {
 <div class="grid-wrapper" id="swipeArea">
   <div class="grid" id="grid"></div>
   <svg id="svg"></svg>
-  <div id="winOverlay" class="win-overlay hidden">
-  <div class="win-text">
-    <div>Awesome</div>
-    <div>Completed</div>
-    <div style="font-size:16px; margin-top:15px; font-weight:400;">
-      Tap to play again
-    </div>
-  </div>
+  <div class="overlay" id="overlayText">Completed!</div>
 </div>
 
 <div class="word-list" id="wordList"></div>
@@ -427,11 +399,6 @@ document.addEventListener("touchend", e => {
   end();
 });
 
-  document.getElementById("winOverlay").addEventListener("click", () => {
-  document.getElementById("winOverlay").classList.add("hidden");
-  initGame(currentIndex); // restart current game
-});
-  
 loadGames();
 </script>
 </body>
