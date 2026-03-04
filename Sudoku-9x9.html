@@ -405,6 +405,10 @@ function checkCompletion() {
   showOverlay("Completed");
 }
 
+  document.getElementById("winOverlay").addEventListener("click", () => {
+  document.getElementById("winOverlay").classList.add("hidden");
+  resetGrid(); // restart the same Sudoku puzzle
+});
   
 loadGames();
 </script>
