@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Memory Game</title>
+
+<style>
+:root {
+  --bg-color: #dbe7e0;
+  --text-color: #000;
+}
+
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: var(--bg-color);
+  color: var(--text-color);
+  display: flex;
+  justify-content: center;
+}
+
+.app {
+  max-width: 420px;
+  width: 100%;
+  padding: 20px;
+}
+
+.title {
+  text-align: center;
+  font-size: 20px;
+  margin: 40px 0 20px;
+}
+
+.grid {
+  display: grid;
+  gap: 8px;
+}
+
+.card {
+  aspect-ratio: 1/1;
+  position: relative;
+  perspective: 600px;
+}
+
+.card-inner {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  transition: transform 0.5s;
+  transform-style: preserve-3d;
+}
+
+.card.flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.card-front {
+  transform: rotateY(180deg);
+}
+
+.card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.3);
+}
+
+.dot.active {
+  background: rgba(0,0,0,0.7);
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+  <div class="dots" id="dots"></div>
+  <div class="title" id="gameTitle">Loading...</div>
+  <div id="grid" class="grid"></div>
+
+</div>
+
+<script>
+const SUPABASE_URL = "https://tppyzexttkuvcobbbmaz.supabase.co";
+const SUPABASE_ANON_KEY = "YOUR_KEY_HERE";
+
+let games = [];
+let currentIndex = 0;
+let cards = [];
+let flippedCards = [];
+let lockBoard = false;
+
+const gridEl = document.getElementById("grid");
+const dotsEl = document.getElementById("dots");
+
+
+// =======================
+// FETCH GAMES
+// =======================
+
+async function loadGames() {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/memory_current_3x6`,
+    {
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+      }
+    }
+  );
+
+  games = await res.json();
+
+  if (!games.length) {
+    document.getElementById("gameTitle").textContent = "No games available";
+    return;
+  }
+
+  buildDots();
+  initGame(0);
+}
+
+
+// =======================
+// INIT GAME
+// =======================
+
+async function initGame(index) {
+  currentIndex = index;
+  const game = games[index];
+
+  document.documentElement.style.setProperty('--bg-color', game.bgcolor);
+  document.documentElement.style.setProperty('--text-color', game.textcolor);
+  document.getElementById("gameTitle").textContent = game.title;
+
+  updateDots();
+
+  const imgRes = await fetch(
+    `${SUPABASE_URL}/rest/v1/memoryimages?gameid=eq.${game.gameid}`,
+    {
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+      }
+    }
+  );
+
+  let images = await imgRes.json();
+
+  // duplicate + shuffle
+  cards = shuffle([...images, ...images]);
+  buildGrid(game);
+}
+
+
+// =======================
+// BUILD GRID
+// =======================
+
+function buildGrid(game) {
+  gridEl.innerHTML = "";
+  gridEl.style.gridTemplateColumns = `repeat(${game.gridcols}, 1fr)`;
+
+  cards.forEach((cardData, index) => {
+
+    const card = document.createElement("div");
+    card.className = "card";
+    card.dataset.pair = cardData.pair_id;
+
+    card.innerHTML = `
+      <div class="card-inner">
+        <div class="card-face card-back">
+          <img src="${game.bcimageurl}" />
+        </div>
+        <div class="card-face card-front">
+          <img src="${cardData.imageurl}" />
+        </div>
+      </div>
+    `;
+
+    card.addEventListener("click", () => flipCard(card));
+    gridEl.appendChild(card);
+  });
+}
+
+
+// =======================
+// FLIP LOGIC
+// =======================
+
+function flipCard(card) {
+  if (lockBoard) return;
+  if (card.classList.contains("flipped")) return;
+
+  card.classList.add("flipped");
+  flippedCards.push(card);
+
+  if (flippedCards.length === 2) {
+    checkMatch();
+  }
+}
+
+function checkMatch() {
+  const [card1, card2] = flippedCards;
+
+  if (card1.dataset.pair === card2.dataset.pair) {
+    flippedCards = [];
+  } else {
+    lockBoard = true;
+    setTimeout(() => {
+      card1.classList.remove("flipped");
+      card2.classList.remove("flipped");
+      flippedCards = [];
+      lockBoard = false;
+    }, 900);
+  }
+}
+
+
+// =======================
+// SWIPE
+// =======================
+
+let startX = 0;
+
+document.addEventListener("touchstart", e => {
+  startX = e.touches[0].clientX;
+});
+
+document.addEventListener("touchend", e => {
+  let diff = e.changedTouches[0].clientX - startX;
+  if (diff > 50) prevGame();
+  if (diff < -50) nextGame();
+});
+
+function nextGame() {
+  let next = (currentIndex + 1) % games.length;
+  initGame(next);
+}
+
+function prevGame() {
+  let prev = (currentIndex - 1 + games.length) % games.length;
+  initGame(prev);
+}
+
+
+// =======================
+// DOTS
+// =======================
+
+function buildDots() {
+  dotsEl.innerHTML = "";
+  games.forEach(() => {
+    const dot = document.createElement("div");
+    dot.className = "dot";
+    dotsEl.appendChild(dot);
+  });
+}
+
+function updateDots() {
+  document.querySelectorAll(".dot").forEach((dot, i) => {
+    dot.classList.toggle("active", i === currentIndex);
+  });
+}
+
+
+// =======================
+// UTIL
+// =======================
+
+function shuffle(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+loadGames();
+</script>
+</body>
+</html>
