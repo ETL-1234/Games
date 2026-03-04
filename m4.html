@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Memory Game</title>
+
+<style>
+:root {
+  --bg-color: #dbe7e0;
+  --text-color: #000;
+}
+
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: var(--bg-color);
+  color: var(--text-color);
+  display: flex;
+  justify-content: center;
+}
+
+.app {
+  max-width: 420px;
+  width: 100%;
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 40px 12px 20px; /* pulls inward */
+}
+
+.title {
+  font-size: 24px;
+}
+
+.moves {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.grid {
+  display: grid;
+  gap: 8px;
+}
+
+.card {
+  aspect-ratio: 1/1;
+  position: relative;
+  perspective: 600px;
+}
+
+.card-inner {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  transition: transform 0.5s;
+  transform-style: preserve-3d;
+}
+
+.card.flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.card-front {
+  transform: rotateY(180deg);
+}
+
+.card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.3);
+}
+
+.dot.active {
+  background: rgba(0,0,0,0.7);
+}
+
+  .win-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.win-overlay.hidden {
+  display: none;
+}
+
+.win-text {
+  color: rgba(255,255,255,0.9);
+  font-size: 42px;
+  text-align: center;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+  @keyframes matchGlow {
+  0% {
+    box-shadow: 0 0 0px rgba(255,255,255,0);
+  }
+  50% {
+    box-shadow: 0 0 18px rgba(255,255,255,0.9);
+  }
+  100% {
+    box-shadow: 0 0 0px rgba(255,255,255,0);
+  }
+}
+
+.card.match-glow {
+  animation: matchGlow 0.6s ease;
+}
+  
+</style>
+</head>
+
+<body>
+<div class="app">
+
+  <div class="dots" id="dots"></div>
+
+<div class="header">
+  <div class="title" id="gameTitle">Loading...</div>
+  <div class="moves" id="moveCounter">00</div>
+</div>
+
+<div id="grid" class="grid"></div>
+
+<div id="winOverlay" class="win-overlay hidden">
+  <div class="win-text">
+    <div>Awesome</div>
+    <div>Completed</div>
+    <div style="font-size:16px; margin-top:15px; font-weight:400;">
+      Tap to play again
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+const SUPABASE_URL = "https://tppyzexttkuvcobbbmaz.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_VZiTsc0JGVx6tVf2Zu-9uQ_-FwjGpQW";
+
+let games = [];
+let currentIndex = 0;
+let cards = [];
+let flippedCards = [];
+let lockBoard = false;
+let moves = 0;
+let matchedPairs = 0;
+
+const gridEl = document.getElementById("grid");
+const dotsEl = document.getElementById("dots");
+
+// =======================
+// WIN OVERLAY RESTART
+// =======================
+
+document.getElementById("winOverlay").addEventListener("click", () => {
+  document.getElementById("winOverlay").classList.add("hidden");
+  initGame(currentIndex); // restart same game
+});
+  
+// =======================
+// FETCH GAMES
+// =======================
+
+async function loadGames() {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/memory_current_4x8`,
+    {
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+      }
+    }
+  );
+
+  games = await res.json();
+
+  if (!games.length) {
+    document.getElementById("gameTitle").textContent = "No games available";
+    return;
+  }
+
+  buildDots();
+  initGame(0);
+}
+
+
+// =======================
+// INIT GAME
+// =======================
+
+async function initGame(index) {
+  currentIndex = index;
+  const game = games[index];
+
+  document.documentElement.style.setProperty('--bg-color', game.bgcolor);
+  document.documentElement.style.setProperty('--text-color', game.textcolor);
+  document.getElementById("gameTitle").textContent = game.title;
+
+  updateDots();
+  moves = 0;
+  matchedPairs = 0;
+  updateMoveCounter();
+  document.getElementById("winOverlay").classList.add("hidden");
+
+  const imgRes = await fetch(
+    `${SUPABASE_URL}/rest/v1/memoryimages?gameid=eq.${game.gameid}`,
+    {
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+      }
+    }
+  );
+
+  let images = await imgRes.json();
+  console.log("GAME ID:", game.gameid);
+  console.log("IMAGES RETURNED:", images);
+
+  // duplicate + shuffle
+  cards = shuffle([...images, ...images]);
+  buildGrid(game);
+}
+
+
+// =======================
+// BUILD GRID
+// =======================
+
+function buildGrid(game) {
+  gridEl.innerHTML = "";
+  gridEl.style.gridTemplateColumns = `repeat(${game.gridcols}, 1fr)`;
+
+  cards.forEach((cardData, index) => {
+
+    const card = document.createElement("div");
+    card.className = "card";
+    card.dataset.pair = cardData.pair_id;
+
+    card.innerHTML = `
+      <div class="card-inner">
+        <div class="card-face card-back">
+          <img src="${game.bcimageurl}" />
+        </div>
+        <div class="card-face card-front">
+          <img src="${cardData.imageurl}" />
+        </div>
+      </div>
+    `;
+
+    card.addEventListener("click", () => flipCard(card));
+    gridEl.appendChild(card);
+  });
+}
+
+
+// =======================
+// FLIP LOGIC
+// =======================
+
+function flipCard(card) {
+  if (lockBoard) return;
+  if (card.classList.contains("flipped")) return;
+
+  card.classList.add("flipped");
+  flippedCards.push(card);
+
+  if (flippedCards.length === 2) {
+    checkMatch();
+  }
+}
+
+function checkMatch() {
+  const [card1, card2] = flippedCards;
+
+  moves++;
+  updateMoveCounter();
+
+ if (card1.dataset.pair === card2.dataset.pair) {
+
+  card1.classList.add("match-glow");
+  card2.classList.add("match-glow");
+
+  setTimeout(() => {
+    card1.classList.remove("match-glow");
+    card2.classList.remove("match-glow");
+  }, 600);
+
+  matchedPairs++;
+  flippedCards = [];
+
+    if (matchedPairs === cards.length / 2) {
+      setTimeout(() => {
+        document.getElementById("winOverlay").classList.remove("hidden");
+      }, 400);
+    }
+
+  } else {
+    lockBoard = true;
+    setTimeout(() => {
+      card1.classList.remove("flipped");
+      card2.classList.remove("flipped");
+      flippedCards = [];
+      lockBoard = false;
+    }, 900);
+  }
+}
+
+
+// =======================
+// SWIPE
+// =======================
+
+let startX = 0;
+
+document.addEventListener("touchstart", e => {
+  startX = e.touches[0].clientX;
+});
+
+document.addEventListener("touchend", e => {
+  let diff = e.changedTouches[0].clientX - startX;
+  if (diff > 50) prevGame();
+  if (diff < -50) nextGame();
+});
+
+function nextGame() {
+  let next = (currentIndex + 1) % games.length;
+  initGame(next);
+}
+
+function prevGame() {
+  let prev = (currentIndex - 1 + games.length) % games.length;
+  initGame(prev);
+}
+
+
+// =======================
+// DOTS
+// =======================
+
+function buildDots() {
+  dotsEl.innerHTML = "";
+  games.forEach(() => {
+    const dot = document.createElement("div");
+    dot.className = "dot";
+    dotsEl.appendChild(dot);
+  });
+}
+
+function updateDots() {
+  document.querySelectorAll(".dot").forEach((dot, i) => {
+    dot.classList.toggle("active", i === currentIndex);
+  });
+}
+
+  function updateMoveCounter() {
+  document.getElementById("moveCounter").textContent =
+    moves.toString().padStart(2, "0");
+}
+
+// =======================
+// UTIL
+// =======================
+
+function shuffle(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+loadGames();
+</script>
+</body>
+</html>
