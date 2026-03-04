@@ -398,7 +398,7 @@ function checkCompletion() {
     }
   }
 
-  showOverlay("Completed");
+  document.getElementById("winOverlay").classList.remove("hidden");
 }
 
   document.getElementById("winOverlay").addEventListener("click", () => {
