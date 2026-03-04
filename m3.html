@@ -308,9 +308,18 @@ function checkMatch() {
   moves++;
   updateMoveCounter();
 
-  if (card1.dataset.pair === card2.dataset.pair) {
-    matchedPairs++;
-    flippedCards = [];
+ if (card1.dataset.pair === card2.dataset.pair) {
+
+  card1.classList.add("match-glow");
+  card2.classList.add("match-glow");
+
+  setTimeout(() => {
+    card1.classList.remove("match-glow");
+    card2.classList.remove("match-glow");
+  }, 600);
+
+  matchedPairs++;
+  flippedCards = [];
 
     if (matchedPairs === cards.length / 2) {
       setTimeout(() => {
