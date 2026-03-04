@@ -428,6 +428,17 @@ document.addEventListener("touchend", e => {
   end();
 });
 
+
+  function checkWinOverlay() {
+  // check if all words have been found
+  const allFound = ANSWERS.every(a =>
+    document.getElementById("word-" + a)?.classList.contains("found")
+  );
+
+  if (allFound) {
+    document.getElementById("winOverlay").classList.remove("hidden");
+  }
+}
   document.getElementById("winOverlay").addEventListener("click", () => {
   document.getElementById("winOverlay").classList.add("hidden");
   initGame(currentIndex); // restart the same word puzzle
