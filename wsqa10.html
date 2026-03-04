@@ -427,6 +427,11 @@ document.addEventListener("touchend", e => {
   end();
 });
 
+  document.getElementById("winOverlay").addEventListener("click", () => {
+  document.getElementById("winOverlay").classList.add("hidden");
+  initGame(currentIndex); // restart current game
+});
+  
 loadGames();
 </script>
 </body>
