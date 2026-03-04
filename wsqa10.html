@@ -428,6 +428,10 @@ document.addEventListener("touchend", e => {
   end();
 });
 
+  document.getElementById("winOverlay").addEventListener("click", () => {
+  document.getElementById("winOverlay").classList.add("hidden");
+  initGame(currentIndex); // restart the same word puzzle
+});
 loadGames();
 </script>
 </body>
