@@ -276,8 +276,19 @@ function flipCard(card) {
 function checkMatch() {
   const [card1, card2] = flippedCards;
 
+  moves++;
+  updateMoveCounter();
+
   if (card1.dataset.pair === card2.dataset.pair) {
+    matchedPairs++;
     flippedCards = [];
+
+    if (matchedPairs === cards.length / 2) {
+      setTimeout(() => {
+        document.getElementById("winOverlay").classList.remove("hidden");
+      }, 400);
+    }
+
   } else {
     lockBoard = true;
     setTimeout(() => {
