@@ -394,16 +394,23 @@ document.addEventListener("mousemove", e => move(e.clientX, e.clientY));
 document.addEventListener("mouseup", end);
 
 document.addEventListener("touchstart", e => {
+  const cell = e.target.closest(".cell");
+  if (!cell) return;
+
   e.preventDefault();
   start(e.touches[0].clientX, e.touches[0].clientY);
 }, { passive: false });
 
 document.addEventListener("touchmove", e => {
+  if (!startIndex) return;
+
   e.preventDefault();
   move(e.touches[0].clientX, e.touches[0].clientY);
 }, { passive: false });
 
 document.addEventListener("touchend", e => {
+  if (!startIndex) return;
+
   e.preventDefault();
   end();
 });
