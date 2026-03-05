@@ -385,7 +385,10 @@ function move(x, y) {
 }
 
 function end() {
-  if (!line) return;
+  if (!line) {
+    isSwipingGrid = false;
+    return;
+  }
 
   const word = path.map(i => LETTERS[i]).join("");
 
