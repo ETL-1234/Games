@@ -275,8 +275,8 @@ swipeArea.addEventListener("touchend", e => {
 
   let diff = e.changedTouches[0].clientX - startX;
 
-  if (diff > 50) prevGame();
-  if (diff < -50) nextGame();
+  if (diff > 70) prevGame();
+  if (diff < -70) nextGame();
 });
 
 /* ===== YOUR ORIGINAL GAME LOGIC BELOW (UNCHANGED) ===== */
