@@ -257,6 +257,7 @@ function prevGame() {
 }
 
 let startX = 0;
+let isSwipingGrid = false;
 document.getElementById("swipeArea").addEventListener("touchstart", e => {
   startX = e.touches[0].clientX;
 });
