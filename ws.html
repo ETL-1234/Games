@@ -408,24 +408,21 @@ function end() {
   isSwipingGrid = false;
 }
 
-document.addEventListener("mousedown", e => start(e.clientX, e.clientY));
-document.addEventListener("mousemove", e => move(e.clientX, e.clientY));
-document.addEventListener("mouseup", end);
+/* ===== GRID DRAWING INPUT (PUZZLE ONLY) ===== */
 
-document.addEventListener("touchstart", e => {
-  e.preventDefault();
+grid.addEventListener("mousedown", e => start(e.clientX, e.clientY));
+grid.addEventListener("mousemove", e => move(e.clientX, e.clientY));
+grid.addEventListener("mouseup", end);
+
+grid.addEventListener("touchstart", e => {
   start(e.touches[0].clientX, e.touches[0].clientY);
-}, { passive: false });
+}, { passive: true });
 
-document.addEventListener("touchmove", e => {
-  e.preventDefault();
+grid.addEventListener("touchmove", e => {
   move(e.touches[0].clientX, e.touches[0].clientY);
-}, { passive: false });
+}, { passive: true });
 
-document.addEventListener("touchend", e => {
-  e.preventDefault();
-  end();
-});
+grid.addEventListener("touchend", end);
 
 loadGames();
 </script>
