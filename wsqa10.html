@@ -262,15 +262,38 @@ function prevGame() {
   initGame(prev);
 }
 
-let startX = 0;
-document.getElementById("swipeArea").addEventListener("touchstart", e => {
-  startX = e.touches[0].clientX;
-});
-document.getElementById("swipeArea").addEventListener("touchend", e => {
-  let diff = e.changedTouches[0].clientX - startX;
-  if (diff > 50) prevGame();
-  if (diff < -50) nextGame();
-});
+  /* ===== PUZZLE SWITCHING (SWIPE BETWEEN GAMES) ===== */
+
+let swipeStartX = 0;
+let swipeStartY = 0;
+
+const swipeArea = document.querySelector(".app");
+const gridElement = document.getElementById("grid");
+
+swipeArea.addEventListener("touchstart", e => {
+
+  // if touch starts inside grid we let puzzle logic handle it
+  if (gridElement.contains(e.target)) return;
+
+  swipeStartX = e.touches[0].clientX;
+  swipeStartY = e.touches[0].clientY;
+
+}, { passive: true });
+
+swipeArea.addEventListener("touchend", e => {
+
+  if (gridElement.contains(e.target)) return;
+
+  const endX = e.changedTouches[0].clientX;
+  const diffX = endX - swipeStartX;
+
+  if (Math.abs(diffX) < 60) return;
+
+  if (diffX > 0) prevGame();
+  else nextGame();
+
+}, { passive: true });
+
 
 /* ===== YOUR ORIGINAL GAME LOGIC BELOW (UNCHANGED) ===== */
 
