@@ -330,8 +330,13 @@ function cellCenter(i) {
 }
 
 function start(x, y) {
+  isSwipingGrid = true;
+
   const cell = getCellAt(x, y);
-  if (!cell) return;
+  if (!cell) {
+    isSwipingGrid = false;
+    return;
+  }
 
   startIndex = Number(cell.dataset.index);
   path = [startIndex];
