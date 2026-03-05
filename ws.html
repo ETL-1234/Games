@@ -257,35 +257,37 @@ function prevGame() {
   initGame(prev);
 }
 
-let startX = 0;
-let swipeAllowed = false;
+  /* ===== PUZZLE SWITCHING (SWIPE BETWEEN GAMES) ===== */
+
+let swipeStartX = 0;
+let swipeStartY = 0;
 
 const swipeArea = document.getElementById("swipeArea");
 const gridElement = document.getElementById("grid");
 
 swipeArea.addEventListener("touchstart", e => {
 
-  const target = e.target;
+  // if touch starts inside grid we let puzzle logic handle it
+  if (gridElement.contains(e.target)) return;
 
-  // if the touch starts inside the grid, disable puzzle switching
-  if (gridElement.contains(target)) {
-    swipeAllowed = false;
-    return;
-  }
+  swipeStartX = e.touches[0].clientX;
+  swipeStartY = e.touches[0].clientY;
 
-  swipeAllowed = true;
-  startX = e.touches[0].clientX;
-});
+}, { passive: true });
 
 swipeArea.addEventListener("touchend", e => {
 
-  if (!swipeAllowed) return;
+  if (gridElement.contains(e.target)) return;
 
-  let diff = e.changedTouches[0].clientX - startX;
+  const endX = e.changedTouches[0].clientX;
+  const diffX = endX - swipeStartX;
 
-  if (diff > 60) prevGame();
-  if (diff < -60) nextGame();
-});
+  if (Math.abs(diffX) < 60) return;
+
+  if (diffX > 0) prevGame();
+  else nextGame();
+
+}, { passive: true });
 
 /* ===== YOUR ORIGINAL GAME LOGIC BELOW (UNCHANGED) ===== */
 
