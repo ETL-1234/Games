@@ -258,11 +258,18 @@ function prevGame() {
 
 let startX = 0;
 let isSwipingGrid = false;
-document.getElementById("swipeArea").addEventListener("touchstart", e => {
+const swipeArea = document.getElementById("swipeArea");
+
+swipeArea.addEventListener("touchstart", e => {
+  if (isSwipingGrid) return;
   startX = e.touches[0].clientX;
 });
-document.getElementById("swipeArea").addEventListener("touchend", e => {
+
+swipeArea.addEventListener("touchend", e => {
+  if (isSwipingGrid) return;
+
   let diff = e.changedTouches[0].clientX - startX;
+
   if (diff > 50) prevGame();
   if (diff < -50) nextGame();
 });
