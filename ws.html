@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Word Search</title>
+<title>Word Search</title>  
 
 <style>
 :root {
@@ -14,7 +14,7 @@
 
 body {
   margin: 0;
-  padding: 10px 0px 20px 0px;
+  padding: 80px 0px 20px 0px;
   font-family:"Inter",Inter,Arial,sans-serif;
   background: var(--bg-color);
   display: flex;
@@ -37,7 +37,7 @@ body {
 
 h1 {
   text-align: center;
-  margin: 30px 0 16px 0;
+  margin: 0 0 16px 0;
   font-size: 20px;
 }
 
@@ -129,8 +129,6 @@ svg {
 <body>
 <div class="app">
 
-<div class="dots" id="dots"></div>
-
 <h1 id="gameTitle">Loading...</h1>
 
 <div class="grid-wrapper" id="swipeArea">
@@ -140,6 +138,7 @@ svg {
 </div>
 
 <div class="word-list" id="wordList"></div>
+<div class="dots" id="dots"></div>
 
 </div>
 
@@ -165,7 +164,7 @@ const dotsEl = document.getElementById("dots");
 
 async function loadGames() {
   const response = await fetch(
-    `${SUPABASE_URL}/rest/v1/GamesWordSearch?active=eq.true&type=eq.20&order=startdate.desc`,
+    `${SUPABASE_URL}/rest/v1/GamesWordSearch?active=eq.true&order=startdate.desc`,
     {
       headers: {
         apikey: SUPABASE_ANON_KEY,
@@ -257,27 +256,13 @@ function prevGame() {
 }
 
 let startX = 0;
-let startedInGrid = false;
-
-const swipeArea = document.getElementById("swipeArea");
-const gridElement = document.getElementById("grid");
-
-swipeArea.addEventListener("touchstart", e => {
+document.getElementById("swipeArea").addEventListener("touchstart", e => {
   startX = e.touches[0].clientX;
-
-  // check if touch started inside the grid
-  startedInGrid = gridElement.contains(e.target);
 });
-
-swipeArea.addEventListener("touchend", e => {
-
-  // ignore swipe if it began inside the grid
-  if (startedInGrid) return;
-
+document.getElementById("swipeArea").addEventListener("touchend", e => {
   let diff = e.changedTouches[0].clientX - startX;
-
-  if (diff > 70) prevGame();
-  if (diff < -70) nextGame();
+  if (diff > 50) prevGame();
+  if (diff < -50) nextGame();
 });
 
 /* ===== YOUR ORIGINAL GAME LOGIC BELOW (UNCHANGED) ===== */
@@ -294,10 +279,9 @@ function indexToRC(i) {
 function getDir(a, b) {
   const dr = b.r - a.r;
   const dc = b.c - a.c;
-  if (dr === 0 && dc === 1) return { dr: 0, dc: 1 };   // →
-  if (dc === 0 && dr === 1) return { dr: 1, dc: 0 };   // ↓
-  if (dr >= 1 && dc >= 1) return { dr: 1, dc: 1 };     // ↘
-   if (dr >= 1 && dc <= -1) return { dr: 1, dc: -1 };  // ↙
+  if (dr === 0 && dc === 1) return { dr: 0, dc: 1 };
+  if (dc === 0 && dr === 1) return { dr: 1, dc: 0 };
+  if (dr >= 1 && dc >= 1) return { dr: 1, dc: 1 };
   return null;
 }
 
@@ -395,23 +379,16 @@ document.addEventListener("mousemove", e => move(e.clientX, e.clientY));
 document.addEventListener("mouseup", end);
 
 document.addEventListener("touchstart", e => {
-  const cell = e.target.closest(".cell");
-  if (!cell) return;
-
   e.preventDefault();
   start(e.touches[0].clientX, e.touches[0].clientY);
 }, { passive: false });
 
 document.addEventListener("touchmove", e => {
-  if (!startIndex) return;
-
   e.preventDefault();
   move(e.touches[0].clientX, e.touches[0].clientY);
 }, { passive: false });
 
 document.addEventListener("touchend", e => {
-  if (!startIndex) return;
-
   e.preventDefault();
   end();
 });
