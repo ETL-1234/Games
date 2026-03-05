@@ -419,8 +419,9 @@ grid.addEventListener("touchstart", e => {
 }, { passive: true });
 
 grid.addEventListener("touchmove", e => {
+  e.preventDefault();
   move(e.touches[0].clientX, e.touches[0].clientY);
-}, { passive: true });
+}, { passive: false });
 
 grid.addEventListener("touchend", end);
 
