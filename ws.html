@@ -256,11 +256,25 @@ function prevGame() {
 }
 
 let startX = 0;
-document.getElementById("swipeArea").addEventListener("touchstart", e => {
+let startedInGrid = false;
+
+const swipeArea = document.getElementById("swipeArea");
+const gridElement = document.getElementById("grid");
+
+swipeArea.addEventListener("touchstart", e => {
   startX = e.touches[0].clientX;
+
+  // check if touch started inside the grid
+  startedInGrid = gridElement.contains(e.target);
 });
-document.getElementById("swipeArea").addEventListener("touchend", e => {
+
+swipeArea.addEventListener("touchend", e => {
+
+  // ignore swipe if it began inside the grid
+  if (startedInGrid) return;
+
   let diff = e.changedTouches[0].clientX - startX;
+
   if (diff > 50) prevGame();
   if (diff < -50) nextGame();
 });
