@@ -317,6 +317,15 @@ if(w.length>max)max=w.length;
 
 wordGrid.style.gridTemplateColumns=`repeat(${max},36px)`;
 
+/* limit rows depending on puzzle size */
+
+let maxRows=18;
+
+if(currentGame && currentGame.maxletters==6){
+maxRows=15;
+}
+
+const wordsToShow=words.slice(0,maxRows);
 words.forEach(word=>{
 
 const row=document.createElement("div");
