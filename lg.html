@@ -348,51 +348,49 @@ updateDots();
 BUILD WORD GRID
 ================================ */
 
-function buildWordGrid(){
+function buildWordGrid() {
 
-wordGrid.innerHTML="";
+  wordGrid.innerHTML="";
 
-let max=0;
+  // Determine max letters in this set
+  let max=0;
+  words.forEach(w=>{
+    if(w.length>max) max=w.length;
+  });
 
-words.forEach(w=>{
-if(w.length>max)max=w.length;
-});
+  /* limit rows depending on puzzle size */
+  let maxRows=18;
+  if(currentGame && currentGame.maxletters==6){
+    maxRows=15;
+  }
 
-wordGrid.style.gridTemplateColumns=`repeat(${max},36px)`;
+  const wordsToShow = words.slice(0,maxRows);
 
-/* limit rows depending on puzzle size */
+  wordsToShow.forEach(word=>{
 
-let maxRows=18;
+    const row=document.createElement("div");
+    row.style.display="flex";
+    row.style.gap="6px";
+    row.style.marginBottom="4px";
 
-if(currentGame && currentGame.maxletters==6){
-maxRows=15;
+    for(let i=0;i<max;i++){
+
+      const cell=document.createElement("div");
+      cell.className="word-cell";
+
+      if(i<word.length){
+        cell.dataset.letter=word[i];
+        cell.dataset.word=word;
+      }
+
+      row.appendChild(cell);
+    }
+
+    wordGrid.appendChild(row);
+
+  });
+
 }
-
-const wordsToShow=words.slice(0,maxRows);
-wordsToShow.forEach(word=>{
-
-const row=document.createElement("div");
-row.style.display="contents";
-
-for(let i=0;i<max;i++){
-
-const cell=document.createElement("div");
-cell.className="word-cell";
-
-if(i<word.length){
-cell.dataset.letter=word[i];
-cell.dataset.word=word;
-}
-
-row.appendChild(cell);
-}
-
-wordGrid.appendChild(row);
-
-});
-
-}
-
 /* ================================
 LETTERS
 ================================ */
