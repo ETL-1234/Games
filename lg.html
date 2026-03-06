@@ -240,6 +240,14 @@ const dotsEl=document.getElementById("dots");
 
 let activeCells=[];
 
+  const undoBtn=document.getElementById("undoBtn");
+
+undoBtn.addEventListener("click",()=>{
+  if(activeCells.length===0) return;
+  const last=activeCells.pop();
+  last.textContent="";
+});
+
 /* ================================
 LOAD GAMES
 ================================ */
@@ -264,10 +272,13 @@ title.textContent="No Games";
 return;
 }
 
+ 
 buildDots();
 loadSet(0);
 
 }
+
+  
 
 /* ================================
 INIT GAME
