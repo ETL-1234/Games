@@ -242,6 +242,8 @@ Authorization:`Bearer ${SUPABASE_ANON_KEY}`
 });
 
 games=await res.json();
+/* group game sets */
+sets=[...new Set(games.map(g=>g.gameid.substring(0,4)))];
 
 if(!games.length){
 title.textContent="No Games";
