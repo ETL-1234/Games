@@ -259,6 +259,18 @@ loadSet(0);
 INIT GAME
 ================================ */
 
+  function loadSet(i){
+
+currentSetIndex=i;
+
+const setId=sets[i];
+
+const easyGame=games.find(g=>g.gameid===setId+"a");
+
+initGame(games.indexOf(easyGame));
+
+}
+  
 function initGame(i){
 
 currentIndex=i;
