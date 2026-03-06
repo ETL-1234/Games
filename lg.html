@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Letter Garden</title>
+
+<style>
+
+:root{
+--bg-color:#dbe7e0;
+--letter-bg:#ffffff;
+--word-bg:rgba(255,255,255,0.4);
+--font-letter:#000;
+--font-word:#000;
+--btnA:#a8c5b5;
+--btnB:#7fa895;
+--btnFont:#000;
+}
+
+body{
+margin:0;
+font-family:Inter,Arial,sans-serif;
+background:var(--bg-color);
+display:flex;
+justify-content:center;
+overflow:hidden;
+}
+
+.app{
+width:100%;
+max-width:420px;
+height:100vh;
+display:flex;
+flex-direction:column;
+align-items:center;
+position:relative;
+background-size:cover;
+background-position:center;
+}
+
+/* ---------- swipe dots ---------- */
+
+.dots{
+position:absolute;
+top:8px;
+left:50%;
+transform:translateX(-50%);
+display:flex;
+gap:6px;
+}
+
+.dot{
+width:8px;
+height:8px;
+border-radius:50%;
+background:rgba(0,0,0,0.25);
+}
+
+.dot.active{
+background:rgba(0,0,0,0.7);
+}
+
+/* ---------- header ---------- */
+
+.header{
+margin-top:30px;
+width:90%;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.title{
+font-size:20px;
+font-weight:600;
+}
+
+.score{
+font-size:18px;
+}
+
+/* ---------- word grid ---------- */
+
+.word-grid{
+margin-top:20px;
+display:grid;
+gap:6px;
+justify-content:center;
+}
+
+.word-cell{
+width:36px;
+height:36px;
+display:flex;
+align-items:center;
+justify-content:center;
+background:var(--word-bg);
+color:var(--font-word);
+border-radius:6px;
+font-weight:600;
+}
+
+/* ---------- letters ---------- */
+
+.letters{
+margin-top:auto;
+display:flex;
+gap:10px;
+margin-bottom:14px;
+}
+
+.letter{
+width:44px;
+height:44px;
+background:var(--letter-bg);
+color:var(--font-letter);
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:8px;
+font-size:20px;
+font-weight:700;
+}
+
+/* ---------- buttons ---------- */
+
+.buttons{
+display:flex;
+gap:10px;
+margin-bottom:20px;
+}
+
+.btn{
+padding:8px 18px;
+border-radius:8px;
+font-size:14px;
+}
+
+.btn.easy{
+background:var(--btnA);
+color:var(--btnFont);
+}
+
+.btn.challenge{
+background:var(--btnB);
+color:var(--btnFont);
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="app" id="app">
+
+<div class="dots" id="dots"></div>
+
+<div class="header">
+<div class="title" id="gameTitle">Loading...</div>
+<div class="score" id="score">00</div>
+</div>
+
+<div class="word-grid" id="wordGrid"></div>
+
+<div class="letters" id="letters"></div>
+
+<div class="buttons">
+<div class="btn easy" id="btnEasy">Easy</div>
+<div class="btn challenge" id="btnChallenge">Challenge</div>
+</div>
+
+</div>
+
+
+<script>
+
+/* ================================
+SUPABASE
+================================ */
+
+const SUPABASE_URL="https://tppyzexttkuvcobbbmaz.supabase.co";
+const SUPABASE_ANON_KEY="YOUR_KEY";
+
+let games=[];
+let currentIndex=0;
+
+/* ================================
+GAME STATE
+================================ */
+
+let currentLetters=[];
+let words=[];
+let foundWords=[];
+let score=0;
+
+/* ================================
+DOM
+================================ */
+
+const app=document.getElementById("app");
+const title=document.getElementById("gameTitle");
+const scoreEl=document.getElementById("score");
+const wordGrid=document.getElementById("wordGrid");
+const lettersEl=document.getElementById("letters");
+const dotsEl=document.getElementById("dots");
+
+let activeCells=[];
+
+/* ================================
+LOAD GAMES
+================================ */
+
+async function loadGames(){
+
+const res=await fetch(
+`${SUPABASE_URL}/rest/v1/lettergarden_current?order=effective_orderby.asc`,
+{
+headers:{
+apikey:SUPABASE_ANON_KEY,
+Authorization:`Bearer ${SUPABASE_ANON_KEY}`
+}
+});
+
+games=await res.json();
+
+if(!games.length){
+title.textContent="No Games";
+return;
+}
+
+buildDots();
+initGame(0);
+
+}
+
+/* ================================
+INIT GAME
+================================ */
+
+function initGame(i){
+
+currentIndex=i;
+const game=games[i];
+
+title.textContent=game.name;
+
+app.style.backgroundImage=`url(${game.bgimageurl})`;
+
+document.documentElement.style.setProperty('--letter-bg',game.bgcolorletter);
+document.documentElement.style.setProperty('--word-bg',game.bgcolorword);
+document.documentElement.style.setProperty('--font-letter',game.fontcolorletter);
+document.documentElement.style.setProperty('--font-word',game.fontcolorword);
+document.documentElement.style.setProperty('--btnA',game.bgcolorbuttona);
+document.documentElement.style.setProperty('--btnB',game.bgcolorbuttonb);
+document.documentElement.style.setProperty('--btnFont',game.fontcolorbutton);
+
+currentLetters=game.letterjson;
+words=game.wordjson;
+foundWords=[];
+score=0;
+
+scoreEl.textContent="00";
+
+buildWordGrid();
+buildLetters();
+updateDots();
+
+}
+
+/* ================================
+BUILD WORD GRID
+================================ */
+
+function buildWordGrid(){
+
+wordGrid.innerHTML="";
+
+let max=0;
+
+words.forEach(w=>{
+if(w.length>max)max=w.length;
+});
+
+wordGrid.style.gridTemplateColumns=`repeat(${max},36px)`;
+
+words.forEach(word=>{
+
+const row=document.createElement("div");
+row.style.display="contents";
+
+for(let i=0;i<max;i++){
+
+const cell=document.createElement("div");
+cell.className="word-cell";
+
+if(i<word.length){
+cell.dataset.letter=word[i];
+cell.dataset.word=word;
+}
+
+row.appendChild(cell);
+}
+
+wordGrid.appendChild(row);
+
+});
+
+}
+
+/* ================================
+LETTERS
+================================ */
+
+function buildLetters(){
+
+lettersEl.innerHTML="";
+
+currentLetters.forEach(letter=>{
+
+const el=document.createElement("div");
+el.className="letter";
+el.textContent=letter;
+
+el.addEventListener("click",()=>placeLetter(letter));
+
+lettersEl.appendChild(el);
+
+});
+
+}
+
+function placeLetter(letter){
+
+const empty=[...document.querySelectorAll(".word-cell")]
+.find(c=>!c.textContent);
+
+if(!empty) return;
+
+empty.textContent=letter;
+activeCells.push(empty);
+
+checkWords();
+
+}
+
+/* ================================
+WORD CHECK
+================================ */
+
+function checkWords(){
+
+const rows=[...wordGrid.children];
+
+rows.forEach(r=>{
+
+let word="";
+let cells=[...r.children];
+
+cells.forEach(c=>{
+word+=c.textContent||"";
+});
+
+if(words.includes(word) && !foundWords.includes(word)){
+
+foundWords.push(word);
+
+cells.forEach(c=>{
+c.style.background="rgba(0,0,0,0.15)";
+});
+
+score+=word.length-1;
+
+scoreEl.textContent=String(score).padStart(2,"0");
+
+}
+
+});
+
+}
+
+/* ================================
+DOTS
+================================ */
+
+function buildDots(){
+
+dotsEl.innerHTML="";
+
+games.forEach(()=>{
+
+const d=document.createElement("div");
+d.className="dot";
+dotsEl.appendChild(d);
+
+});
+
+}
+
+function updateDots(){
+
+document.querySelectorAll(".dot")
+.forEach((d,i)=>{
+d.classList.toggle("active",i===currentIndex);
+});
+
+}
+
+/* ================================
+SWIPE BETWEEN SETS
+================================ */
+
+let startX=0;
+
+app.addEventListener("touchstart",e=>{
+startX=e.touches[0].clientX;
+},{passive:true});
+
+app.addEventListener("touchend",e=>{
+
+const diff=e.changedTouches[0].clientX-startX;
+
+if(Math.abs(diff)<60) return;
+
+if(diff<0) nextGame();
+else prevGame();
+
+},{passive:true});
+
+function nextGame(){
+
+currentIndex=(currentIndex+1)%games.length;
+initGame(currentIndex);
+
+}
+
+function prevGame(){
+
+currentIndex=(currentIndex-1+games.length)%games.length;
+initGame(currentIndex);
+
+}
+
+/* ================================
+START
+================================ */
+
+loadGames();
+
+</script>
+
+</body>
+</html>
