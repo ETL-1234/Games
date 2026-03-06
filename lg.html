@@ -248,6 +248,23 @@ undoBtn.addEventListener("click",()=>{
   last.textContent="";
 });
 
+  const btnEasy=document.getElementById("btnEasy");
+const btnChallenge=document.getElementById("btnChallenge");
+
+btnEasy.addEventListener("click",()=>{
+  if(!currentGame) return;
+  const setId=currentGame.gameid.substring(0,4);
+  const easyGame=games.find(g=>g.gameid===setId+"a");
+  initGame(games.indexOf(easyGame));
+});
+
+btnChallenge.addEventListener("click",()=>{
+  if(!currentGame) return;
+  const setId=currentGame.gameid.substring(0,4);
+  const challengeGame=games.find(g=>g.gameid===setId+"b");
+  initGame(games.indexOf(challengeGame));
+});
+
 /* ================================
 LOAD GAMES
 ================================ */
