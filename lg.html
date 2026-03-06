@@ -472,15 +472,15 @@ else prevGame();
 
 function nextGame(){
 
-currentIndex=(currentIndex+1)%games.length;
-initGame(currentIndex);
+currentSetIndex=(currentSetIndex+1)%sets.length;
+loadSet(currentSetIndex);
 
 }
 
-function prevGame(){
+  function prevGame(){
 
-currentIndex=(currentIndex-1+games.length)%games.length;
-initGame(currentIndex);
+currentSetIndex=(currentSetIndex-1+sets.length)%sets.length;
+loadSet(currentSetIndex);
 
 }
 
