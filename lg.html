@@ -444,17 +444,21 @@ checkWords();
 /* ================================
 WORD CHECK
 ================================ */
-
 function checkWords(){
 
-const rows=[...wordGrid.children];
+const cells=[...document.querySelectorAll(".word-cell")];
 
-rows.forEach(r=>{
+let cols = 8;
+if(currentGame && currentGame.maxletters == 6){
+  cols = 6;
+}
+
+for(let r=0;r<cells.length;r+=cols){
 
 let word="";
-let cells=[...r.children];
+let rowCells=cells.slice(r,r+cols);
 
-cells.forEach(c=>{
+rowCells.forEach(c=>{
 word+=c.textContent||"";
 });
 
@@ -462,19 +466,19 @@ if(words.includes(word) && !foundWords.includes(word)){
 
 foundWords.push(word);
 
-cells.forEach(c=>{
+rowCells.forEach(c=>{
 c.style.background="rgba(0,0,0,0.15)";
 });
 
 score+=word.length-1;
-
 scoreEl.textContent=String(score).padStart(2,"0");
 
 }
 
-});
+}
 
 }
+
 
 /* ================================
 DOTS
