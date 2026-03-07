@@ -348,27 +348,28 @@ updateDots();
 BUILD WORD GRID
 ================================ */
 
-function buildWordGrid() {
+  function buildWordGrid() {
 
   wordGrid.innerHTML="";
 
-  // Determine max letters in this set
-  let max=0;
-  wordsToShow.forEach(w=>{
-    if(w.length>max) max=w.length;
-  });
-
   /* limit rows depending on puzzle size */
-  let maxRows=18;
-  if(currentGame && currentGame.maxletters==6){
-    maxRows=15;
+  let maxRows = 18;
+
+  if(currentGame && currentGame.maxletters == 6){
+    maxRows = 15;
   }
 
-  const wordsToShow = words.slice(0,maxRows);
+  const wordsToShow = words.slice(0, maxRows);
+
+  /* determine max letters */
+  let max = 0;
+  wordsToShow.forEach(w=>{
+    if(w.length > max) max = w.length;
+  });
 
   wordsToShow.forEach(word=>{
 
-    const row=document.createElement("div");
+    const row = document.createElement("div");
     row.style.display="flex";
     row.style.gap="6px";
     row.style.marginBottom="4px";
@@ -391,6 +392,7 @@ function buildWordGrid() {
   });
 
 }
+
 /* ================================
 LETTERS
 ================================ */
