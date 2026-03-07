@@ -491,6 +491,18 @@ scoreEl.textContent=String(score).padStart(2,"0");
 
 }
 
+  function triggerBonusGlow(cells){
+
+cells.forEach(c=>{
+  c.classList.add("bonus-glow");
+
+  setTimeout(()=>{
+    c.classList.remove("bonus-glow");
+  },600);
+
+});
+
+}
 
 /* ================================
 DOTS
