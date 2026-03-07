@@ -333,8 +333,14 @@ document.documentElement.style.setProperty('--btnA',game.bgcolorbuttona);
 document.documentElement.style.setProperty('--btnB',game.bgcolorbuttonb);
 document.documentElement.style.setProperty('--btnFont',game.fontcolorbutton);
 
-currentLetters=game.letterjson;
-words=game.wordjson;
+currentLetters = Array.isArray(game.letterjson)
+  ? game.letterjson
+  : JSON.parse(game.letterjson);
+
+words = Array.isArray(game.wordjson)
+  ? game.wordjson
+  : JSON.parse(game.wordjson);
+  
 foundWords=[];
 score=0;
 activeCells=[];
