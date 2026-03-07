@@ -351,51 +351,53 @@ updateDots();
 BUILD WORD GRID
 ================================ */
 
-  function buildWordGrid() {
+  function buildWordGrid(){
 
   wordGrid.innerHTML="";
 
-  /* limit rows depending on puzzle size */
-  let maxRows = 18;
+  let cols = 8;
+  let rows = 18;
 
   if(currentGame && currentGame.maxletters == 6){
-    maxRows = 15;
+    cols = 6;
+    rows = 15;
   }
 
-  const wordsToShow = words.slice(0, maxRows);
+  /* tell CSS how many columns */
+  wordGrid.style.gridTemplateColumns = `repeat(${cols}, 36px)`;
 
-  /* determine max letters */
-  let max = 0;
-  wordsToShow.forEach(w=>{
-    if(w.length > max) max = w.length;
+  /* flatten words into grid */
+  const cells = [];
+
+  words.forEach(word=>{
+    word.split("").forEach(letter=>{
+      cells.push({letter:letter, word:word});
+    });
   });
 
-  wordsToShow.forEach(word=>{
+  /* fill remaining spaces */
+  const total = cols * rows;
 
-    const row = document.createElement("div");
-    row.style.display="flex";
-    row.style.gap="6px";
-    row.style.marginBottom="4px";
+  while(cells.length < total){
+    cells.push(null);
+  }
 
-    for(let i=0;i<max;i++){
+  /* build grid */
+  cells.slice(0,total).forEach(data=>{
 
-      const cell=document.createElement("div");
-      cell.className="word-cell";
+    const cell=document.createElement("div");
+    cell.className="word-cell";
 
-      if(i<word.length){
-        cell.dataset.letter=word[i];
-        cell.dataset.word=word;
-      }
-
-      row.appendChild(cell);
+    if(data){
+      cell.dataset.letter=data.letter;
+      cell.dataset.word=data.word;
     }
 
-    wordGrid.appendChild(row);
+    wordGrid.appendChild(cell);
 
   });
 
 }
-
 /* ================================
 LETTERS
 ================================ */
