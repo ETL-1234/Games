@@ -469,7 +469,8 @@ if(words.includes(word) && !foundWords.includes(word)){
 foundWords.push(word);
 
 rowCells.forEach(c=>{
-c.style.background="rgba(0,0,0,0.15)";
+  c.style.background="rgba(0,0,0,0.15)";
+  c.dataset.locked = "true";
 });
 
 score+=word.length-1;
