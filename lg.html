@@ -343,6 +343,10 @@ currentLetters = Array.isArray(game.letterjson)
 words = Array.isArray(game.wordjson)
   ? game.wordjson
   : JSON.parse(game.wordjson);
+
+bonusWords = Array.isArray(game.bonuswordsjson)
+  ? game.bonuswordsjson
+  : JSON.parse(game.bonuswordsjson || "[]");
   
 foundWords=[];
 score=0;
