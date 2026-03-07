@@ -432,7 +432,7 @@ lettersEl.appendChild(el);
 function placeLetter(letter){
 
 const empty=[...document.querySelectorAll(".word-cell")]
-.find(c=>!c.textContent);
+.find(c=>!c.textContent && !c.dataset.locked);
 
 if(!empty) return;
 
