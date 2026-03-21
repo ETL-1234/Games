@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Flower Puzzle</title>
+
+<style>
+  body { font-family: sans-serif; }
+
+  #board {
+    position: relative;
+    margin: 40px;
+  }
+
+  .cell {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid #ccc;
+    position: absolute;
+  }
+
+  .piece {
+    position: absolute;
+    cursor: grab;
+    touch-action: none;
+    transition: transform 0.2s;
+  }
+
+  .block {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid black;
+    position: absolute;
+    background: lightblue;
+  }
+
+  .placed .block {
+    background: lightgreen;
+  }
+</style>
+</head>
+
+<body>
+
+<h2>Flower Puzzle</h2>
+<button onclick="validate()">Check Solution</button>
+
+<div id="board"></div>
+
+<script>
+// ------------------ CONFIG ------------------
+const cellSize = 40;
+
+// ------------------ BOARD ------------------
+const boardCells = [
+  [2,0],[3,0],[4,0],
+  [1,1],[2,1],[3,1],[4,1],
+  [0,2],[1,2],[2,2],[3,2],[4,2],
+  [0,3],[1,3],[2,3],[3,3],[4,3],
+  [1,4],[2,4],[3,4],[4,4],
+  [2,5],[3,5],[4,5]
+];
+
+const board = document.getElementById("board");
+
+// render board
+boardCells.forEach(([x,y]) => {
+  const div = document.createElement("div");
+  div.className = "cell";
+  div.style.left = x * cellSize + "px";
+  div.style.top = y * cellSize + "px";
+  board.appendChild(div);
+});
+
+// ------------------ PIECES ------------------
+const pieces = {
+  A: [[0,0],[0,1],[0,2],[1,2]],
+  B: [[0,0],[1,0],[1,1],[2,1]],
+  C: [[0,0],[1,0],[2,0],[1,1]],
+  D: [[0,0],[1,0],[2,0],[3,0]],
+  E: [[0,0],[1,0],[0,1],[1,1]],
+  F: [[0,0],[0,1],[1,1]],
+  G: [[0,0],[1,0],[2,0]]
+};
+
+let pieceInstances = [];
+
+// create pieces
+let offsetX = 320;
+let offsetY = 20;
+
+Object.entries(pieces).forEach(([id, shape]) => {
+  const piece = document.createElement("div");
+  piece.className = "piece";
+  piece.dataset.id = id;
+  piece.dataset.rot = 0;
+
+  piece.style.left = offsetX + "px";
+  piece.style.top = offsetY + "px";
+
+  shape.forEach(([x,y]) => {
+    const block = document.createElement("div");
+    block.className = "block";
+    block.style.left = x * cellSize + "px";
+    block.style.top = y * cellSize + "px";
+    piece.appendChild(block);
+  });
+
+  board.appendChild(piece);
+  makeInteractive(piece);
+
+  offsetY += 100;
+  pieceInstances.push(piece);
+});
+
+// ------------------ ROTATION ------------------
+function rotateCoord(x,y,rot) {
+  for (let i=0;i<rot;i++) {
+    [x,y] = [y,-x];
+  }
+  return [x,y];
+}
+
+function updatePieceBlocks(piece) {
+  const rot = parseInt(piece.dataset.rot);
+
+  piece.childNodes.forEach((block, i) => {
+    const [x,y] = pieces[piece.dataset.id][i];
+    const [nx, ny] = rotateCoord(x,y,rot);
+
+    block.style.left = nx * cellSize + "px";
+    block.style.top = ny * cellSize + "px";
+  });
+}
+
+function rotatePiece(piece) {
+  let rot = (parseInt(piece.dataset.rot) + 1) % 4;
+  piece.dataset.rot = rot;
+  updatePieceBlocks(piece);
+}
+
+// ------------------ DRAG + SMART SNAP ------------------
+function makeInteractive(piece) {
+  let offsetX, offsetY, isDragging = false;
+
+  // store last valid position
+  piece.dataset.validX = piece.style.left;
+  piece.dataset.validY = piece.style.top;
+
+  piece.addEventListener("pointerdown", (e) => {
+    isDragging = true;
+    piece.setPointerCapture(e.pointerId);
+
+    offsetX = e.offsetX;
+    offsetY = e.offsetY;
+  });
+
+  piece.addEventListener("pointermove", (e) => {
+    if (!isDragging) return;
+
+    piece.style.left = (e.pageX - offsetX) + "px";
+    piece.style.top = (e.pageY - offsetY) + "px";
+  });
+
+  piece.addEventListener("pointerup", (e) => {
+    isDragging = false;
+    piece.releasePointerCapture(e.pointerId);
+
+    attemptSnap(piece);
+  });
+
+  piece.addEventListener("dblclick", () => rotatePiece(piece));
+}
+
+// ------------------ SNAP VALIDATION ------------------
+function attemptSnap(piece) {
+  const rect = piece.getBoundingClientRect();
+  const boardRect = board.getBoundingClientRect();
+
+  let baseX = Math.round((rect.left - boardRect.left) / cellSize);
+  let baseY = Math.round((rect.top - boardRect.top) / cellSize);
+
+  const newCells = [];
+
+  // compute projected cells
+  piece.childNodes.forEach(block => {
+    const bx = parseInt(block.style.left);
+    const by = parseInt(block.style.top);
+
+    const x = baseX + Math.round(bx / cellSize);
+    const y = baseY + Math.round(by / cellSize);
+
+    newCells.push([x,y]);
+  });
+
+  // validate
+  let occupied = new Set();
+
+  // add all other placed pieces
+  pieceInstances.forEach(p => {
+    if (p === piece) return;
+
+    const rect = p.getBoundingClientRect();
+    const boardRect = board.getBoundingClientRect();
+
+    p.childNodes.forEach(block => {
+      const bx = parseInt(block.style.left);
+      const by = parseInt(block.style.top);
+
+      const x = Math.round((rect.left - boardRect.left + bx) / cellSize);
+      const y = Math.round((rect.top - boardRect.top + by) / cellSize);
+
+      occupied.add(`${x},${y}`);
+    });
+  });
+
+  for (let [x,y] of newCells) {
+    if (!boardCells.some(([cx,cy]) => cx===x && cy===y)) {
+      bounceBack(piece);
+      return;
+    }
+
+    if (occupied.has(`${x},${y}`)) {
+      bounceBack(piece);
+      return;
+    }
+  }
+
+  // valid → snap
+  piece.style.left = (boardRect.left + baseX * cellSize) + "px";
+  piece.style.top = (boardRect.top + baseY * cellSize) + "px";
+
+  piece.dataset.validX = piece.style.left;
+  piece.dataset.validY = piece.style.top;
+  piece.classList.add("placed");
+}
+
+// ------------------ BOUNCE BACK ------------------
+function bounceBack(piece) {
+  piece.style.left = piece.dataset.validX;
+  piece.style.top = piece.dataset.validY;
+
+  piece.style.transform = "scale(1.05)";
+  setTimeout(() => piece.style.transform = "scale(1)", 150);
+}
+
+// ------------------ FINAL VALIDATION ------------------
+function validate() {
+  let occupied = new Set();
+
+  for (let piece of pieceInstances) {
+    const rect = piece.getBoundingClientRect();
+    const boardRect = board.getBoundingClientRect();
+
+    for (let block of piece.childNodes) {
+      const bx = parseInt(block.style.left);
+      const by = parseInt(block.style.top);
+
+      const x = Math.round((rect.left - boardRect.left + bx) / cellSize);
+      const y = Math.round((rect.top - boardRect.top + by) / cellSize);
+
+      const key = `${x},${y}`;
+
+      if (!boardCells.some(([cx,cy]) => cx===x && cy===y)) {
+        alert("❌ Outside board");
+        return;
+      }
+
+      if (occupied.has(key)) {
+        alert("❌ Overlap");
+        return;
+      }
+
+      occupied.add(key);
+    }
+  }
+
+  if (occupied.size === 26) {
+    alert("✅ Puzzle complete!");
+  } else {
+    alert("Not complete");
+  }
+}
+</script>
+
+</body>
+</html>
