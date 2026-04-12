@@ -285,6 +285,8 @@ function buildGrid(game) {
     card.addEventListener("click", () => flipCard(card));
     gridEl.appendChild(card);
   });
+
+   resizeGrid(game);
 }
 
   function resizeGrid(game) {
@@ -309,7 +311,7 @@ function buildGrid(game) {
     `repeat(${game.gridcols}, ${cardSize}px)`;
 }
 
-  resizeGrid(game);
+ 
 
 // =======================
 // FLIP LOGIC
