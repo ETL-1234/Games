@@ -275,8 +275,7 @@ async function initGame(index) {
 function buildGrid(game) {
   gridEl.innerHTML = "";
   gridEl.style.gridTemplateColumns = `repeat(${game.gridcols}, 1fr)`;
-  gridEl.style.gridTemplateRows = `repeat(${game.gridrows}, 1fr)`;
-
+  
   cards.forEach((cardData, index) => {
 
     const card = document.createElement("div");
