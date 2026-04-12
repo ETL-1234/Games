@@ -196,8 +196,8 @@ const dotsEl = document.getElementById("dots");
 // =======================
 
 document.getElementById("winOverlay").addEventListener("click", () => {
-  document.getElementById("winOverlay").classList.add("hidden");
-  initGame(currentIndex); // restart same game
+  document.getElementById("winOverlay").classList.remove("show");
+  initGame(currentIndex);
 });
   
 // =======================
