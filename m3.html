@@ -435,7 +435,13 @@ function updateDots() {
 function shuffle(array) {
   return array.sort(() => Math.random() - 0.5);
 }
-
+  
+window.addEventListener("resize", () => {
+  if (games.length) {
+    resizeGrid(games[currentIndex]);
+  }
+});
+  
 loadGames();
 </script>
 </body>
