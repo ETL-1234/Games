@@ -285,6 +285,28 @@ function buildGrid(game) {
   });
 }
 
+  function resizeGrid(game) {
+  const app = document.querySelector(".app");
+  const header = document.querySelector(".header");
+  const dots = document.querySelector(".dots");
+
+  const availableHeight =
+    window.innerHeight
+    - header.offsetHeight
+    - dots.offsetHeight
+    - 40;
+
+  const availableWidth = app.clientWidth;
+
+  const maxCardWidth = availableWidth / game.gridcols;
+  const maxCardHeight = availableHeight / game.gridrows;
+
+  const cardSize = Math.min(maxCardWidth, maxCardHeight);
+
+  gridEl.style.gridTemplateColumns =
+    `repeat(${game.gridcols}, ${cardSize}px)`;
+}
+  
 
 // =======================
 // FLIP LOGIC
