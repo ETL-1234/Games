@@ -317,6 +317,8 @@ function buildGrid(game) {
     card.addEventListener("click", () => flipCard(card));
     gridEl.appendChild(card);
   });
+
+  resizeGrid(game);
 }
 
 
