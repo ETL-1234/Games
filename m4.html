@@ -306,7 +306,8 @@ function buildGrid(game) {
   gridEl.style.gridTemplateColumns =
     `repeat(${game.gridcols}, ${cardSize}px)`;
 }
-  
+
+  resizeGrid(game);
 
 // =======================
 // FLIP LOGIC
