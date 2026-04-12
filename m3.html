@@ -295,7 +295,14 @@ function buildGrid(game) {
       </div>
     `;
 
-    function resizeGrid(game) {
+     card.addEventListener("click", () => flipCard(card));
+    gridEl.appendChild(card);
+  });
+
+  resizeGrid(game);
+}
+
+     function resizeGrid(game) {
   const app = document.querySelector(".app");
   const header = document.querySelector(".header");
   const dots = document.querySelector(".dots");
@@ -315,14 +322,6 @@ function buildGrid(game) {
 
   gridEl.style.gridTemplateColumns = `repeat(${game.gridcols}, ${cardSize}px)`;
 }
-
-    card.addEventListener("click", () => flipCard(card));
-    gridEl.appendChild(card);
-  });
-
-  resizeGrid(game);
-}
-
 
 // =======================
 // FLIP LOGIC
