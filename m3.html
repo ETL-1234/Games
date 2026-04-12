@@ -209,7 +209,7 @@ const dotsEl = document.getElementById("dots");
 // =======================
 
 document.getElementById("winOverlay").addEventListener("click", () => {
-  document.getElementById("winOverlay").classList.add("hidden");
+  document.getElementById("winOverlay").classList.remove("show")
   initGame(currentIndex); // restart same game
 });
   
@@ -256,7 +256,7 @@ async function initGame(index) {
   moves = 0;
   matchedPairs = 0;
   updateMoveCounter();
-  document.getElementById("winOverlay").classList.add("hidden");
+  document.getElementById("winOverlay").classList.remove("show")
 
   const imgRes = await fetch(
     `${SUPABASE_URL}/rest/v1/memoryimages?gameid=eq.${game.gameid}`,
