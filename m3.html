@@ -368,6 +368,9 @@ function checkMatch() {
   flippedCards = [];
 
     if (matchedPairs === cards.length / 2) {
+
+      document.getElementById("finalMoves").textContent = `${moves} Flips`;
+      
       setTimeout(() => {
     document.getElementById("winOverlay").classList.add("show");
     }, 700);
