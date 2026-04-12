@@ -368,8 +368,8 @@ function checkMatch() {
 
     if (matchedPairs === cards.length / 2) {
       setTimeout(() => {
-        document.getElementById("winOverlay").classList.remove("hidden");
-      }, 400);
+    document.getElementById("winOverlay").classList.add("show");
+    }, 700);
     }
 
   } else {
