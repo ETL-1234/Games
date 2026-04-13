@@ -428,7 +428,11 @@ title.textContent=game.name;
 
 app.style.backgroundImage=`url(${game.bgimageurl})`;
 
-document.documentElement.style.setProperty('--letter-bg',game.bgcolorletter);
+document.documentElement.style.setProperty(
+  '--letter-bg',
+  hexToRGBA(game.bgcolorletter, 0.7)
+);
+  
 document.documentElement.style.setProperty('--word-bg',game.bgcolorword);
 document.documentElement.style.setProperty('--font-letter',game.fontcolorletter);
 document.documentElement.style.setProperty('--font-word',game.fontcolorword);
