@@ -290,6 +290,9 @@ function buildGrid() {
   const rows = LETTERS.length / COLS;
   svg.setAttribute("width", COLS * CELL + (COLS - 1) * GAP);
   svg.setAttribute("height", rows * CELL + (rows - 1) * GAP);
+
+  setTimeout(scaleGridToFit, 0);
+  window.addEventListener("resize", scaleGridToFit);
 }
 
 function buildWords() {
