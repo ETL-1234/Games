@@ -349,8 +349,8 @@ function createPuzzleBoard(boardEl, imageUrl) {
   let hasWon = false;
 
   function solvedBoard() {
-    return [...Array(GRID * GRID).keys()];
-  }
+  return [...Array(GRID * GRID).keys()].slice(1).concat(0);
+}
 
   function neighbors(index) {
     const r = Math.floor(index / GRID);
