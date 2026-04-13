@@ -323,11 +323,14 @@ function buildGrid(game) {
   const header = document.querySelector(".header");
   const dots = document.querySelector(".dots");
 
-  const availableHeight =
-    window.innerHeight
-    - header.offsetHeight
-    - dots.offsetHeight
-    - 40; // padding buffer
+  const BOTTOM_NAV_HEIGHT = 56; // your tab bar height
+  
+    const availableHeight =
+  window.innerHeight
+  - header.offsetHeight
+  - dots.offsetHeight
+  - BOTTOM_NAV_HEIGHT
+  - 40; // padding buffer
 
   const availableWidth = app.clientWidth;
 
