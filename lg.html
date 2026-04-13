@@ -536,6 +536,21 @@ word+=c.textContent||"";
 });
 
 if(words.includes(word) && !foundWords.includes(word)){
+ 
+  // CHECK IF GAME COMPLETE
+if (foundWords.length === words.length) {
+
+  const label = currentGame.maxletters == 6
+    ? "Words Completed"   // Easy
+    : "Words Completed";  // Challenge (same label, cleaner UX)
+
+  document.getElementById("finalScore").textContent =
+    `${foundWords.length} ${label}`;
+
+  setTimeout(() => {
+    document.getElementById("winOverlay").classList.add("show");
+  }, 500);
+}
 
 if(bonusWords.includes(word)){
   triggerBonusGlow(rowCells);
