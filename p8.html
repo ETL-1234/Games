@@ -431,7 +431,7 @@ function createPuzzleBoard(boardEl, imageUrl) {
       boardEl.appendChild(el);
     });
 
-if (gameStarted && isSolved() && !hasWon)
+if (gameStarted && isSolved() && !hasWon) {
   hasWon = true;
 
   const tiles = boardEl.querySelectorAll(".tile");
