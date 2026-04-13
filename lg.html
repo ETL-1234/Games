@@ -389,6 +389,9 @@ currentIndex=i;
 const game=games[i];
 currentGame=game;
 
+gameCompleted = false;
+
+  
   // determine completion target
 if(game.gameid.endsWith("a")){
   targetWords = 15; // easy
