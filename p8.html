@@ -344,6 +344,7 @@ function createPuzzleBoard(boardEl, imageUrl) {
 
   let board = [...Array(GRID * GRID).keys()];
   let lastEmpty = null;
+  let hasWon = false;
 
   function solvedBoard() {
     return [...Array(GRID * GRID).keys()];
