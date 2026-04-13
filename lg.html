@@ -557,7 +557,7 @@ function checkWords(){
   }
 
   // ✅ NOW CHECK COMPLETION ONCE (after loop)
-  if(newWordFound && foundWords.length === words.length){
+  if(foundWords.length === words.length){
 
     document.getElementById("finalScore").textContent =
       `Score ${score}`;
