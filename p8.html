@@ -343,6 +343,7 @@ function renderPuzzles() {
 
 function createPuzzleBoard(boardEl, imageUrl) {
 
+  let gameStarted = false;
   let board = [...Array(GRID * GRID).keys()];
   let lastEmpty = null;
   let hasWon = false;
