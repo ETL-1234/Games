@@ -327,6 +327,12 @@ btnChallenge.addEventListener("click",()=>{
   initGame(games.indexOf(challengeGame));
 });
 
+
+  document.getElementById("winOverlay").addEventListener("click", () => {
+  document.getElementById("winOverlay").classList.remove("show");
+  nextGame(); // go to next set
+});
+  
 /* ================================
 LOAD GAMES
 ================================ */
