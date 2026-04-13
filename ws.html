@@ -135,6 +135,23 @@ svg {
   letter-spacing: 1px;
 }
 
+  /* ===== FORCE HIDE ALL SCROLLBARS ===== */
+
+/* Chrome / Safari / iOS / Android */
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: none;
+}
+
+/* IE / Edge */
+* {
+  -ms-overflow-style: none;
+}
+
 .dots {
   display: flex;
   justify-content: center;
