@@ -424,10 +424,11 @@ function end() {
       document.getElementById("word-" + w)?.classList.contains("found")
     );
 
-    if (allFound) {
-      overlay.style.opacity = 1;
-      setTimeout(() => overlay.style.opacity = 0, 2400);
-    }
+   if (allFound) {
+  setTimeout(() => {
+    document.getElementById("winOverlay").classList.add("show");
+  }, 500);
+}
   } else {
     line.remove();
   }
