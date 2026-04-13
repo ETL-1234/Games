@@ -24,6 +24,18 @@ body {
   overflow-y: auto;     /* allow vertical scroll */
 }
 
+  html, body {
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  scrollbar-width: none; /* Firefox */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
 .app {
   max-width: 100%;
   margin: 0;
@@ -269,6 +281,9 @@ function buildGrid() {
   const rows = LETTERS.length / COLS;
   svg.setAttribute("width", COLS * CELL + (COLS - 1) * GAP);
   svg.setAttribute("height", rows * CELL + (rows - 1) * GAP);
+
+  setTimeout(scaleGridToFit, 0);
+  window.addEventListener("resize", scaleGridToFit);
 }
 
 function buildWords() {
