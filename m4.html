@@ -322,11 +322,14 @@ function buildGrid(game) {
   const header = document.querySelector(".header");
   const dots = document.querySelector(".dots");
 
-  const availableHeight =
-    window.innerHeight
-    - header.offsetHeight
-    - dots.offsetHeight
-    - 40;
+const BOTTOM_NAV_HEIGHT = 56;
+
+const availableHeight =
+  window.innerHeight
+  - header.offsetHeight
+  - dots.offsetHeight
+  - BOTTOM_NAV_HEIGHT
+  - 20; // smaller buffer now
 
   const availableWidth = app.clientWidth;
 
