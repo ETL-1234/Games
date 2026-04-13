@@ -444,7 +444,11 @@ document.documentElement.style.setProperty(
   hexToRGBA(game.bgcolorletter, 0.7)
 );
   
-document.documentElement.style.setProperty('--word-bg',game.bgcolorword);
+document.documentElement.style.setProperty(
+  '--word-bg',
+  hexToRGBA(game.bgcolorword, 0.4)
+);
+  
 document.documentElement.style.setProperty('--font-letter',game.fontcolorletter);
 document.documentElement.style.setProperty('--font-word',game.fontcolorword);
 document.documentElement.style.setProperty('--btnA',game.bgcolorbuttona);
