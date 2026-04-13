@@ -569,15 +569,17 @@ function checkWords(){
   }
 
   // ✅ NOW CHECK COMPLETION ONCE (after loop)
-  if(foundWords.length >= targetWords){
+if(!gameCompleted && foundWords.length >= targetWords){
 
-    document.getElementById("finalScore").textContent =
-      `Score ${score}`;
+  gameCompleted = true;
 
-    setTimeout(() => {
-      document.getElementById("winOverlay").classList.add("show");
-    }, 500);
-  }
+  document.getElementById("finalScore").textContent =
+    `Score ${score}`;
+
+  setTimeout(() => {
+    document.getElementById("winOverlay").classList.add("show");
+  }, 500);
+}
 }
 
   function triggerBonusGlow(cells){
