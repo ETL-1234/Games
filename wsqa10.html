@@ -207,6 +207,11 @@ const wordList = document.getElementById("wordList");
 const overlay = document.getElementById("overlayText");
 const dotsEl = document.getElementById("dots");
 
+document.getElementById("winOverlay").addEventListener("click", () => {
+  document.getElementById("winOverlay").classList.remove("show");
+  nextGame(); // go to next puzzle
+});
+  
 async function loadGames() {
   const response = await fetch(
     `${SUPABASE_URL}/rest/v1/GamesWordSearch?active=eq.true&type=eq.101&order=startdate.desc`,
