@@ -16,12 +16,12 @@
 --btnA:#a8c5b5;
 --btnB:#7fa895;
 --btnFont:#000;
---cell-size:36px;
+--cell-size:min(8vw, 36px);
 }
 
 body {
   margin: 0;
-  padding: 10px 0px 20px 0px;
+  padding: 0;
   font-family:"Inter",Inter,Arial,sans-serif;
   background: var(--bg-color);
   display: flex;
@@ -164,12 +164,13 @@ animation:bonusGlow 0.6s ease;
 margin-top:auto;
 display:flex;
 gap:10px;
-margin-bottom:14px;
+margin-bottom:10px;
+flex-wrap:wrap;
+justify-content:center;
 }
-
 .letter{
-width:44px;
-height:44px;
+width:var(--cell-size);
+height:var(--cell-size);
 background:var(--letter-bg);
 color:var(--font-letter);
 display:flex;
