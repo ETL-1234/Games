@@ -458,12 +458,11 @@ BUILD WORD GRID
   wordGrid.style.display="grid";
 
   let cols = 8;
-  let rows = 18;
+  let rows = 15;
 
   if(currentGame && currentGame.maxletters == 6){
     cols = 6;
-    rows = 15;
-  }
+      }
 
   /* tell CSS how many columns */
  wordGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`
