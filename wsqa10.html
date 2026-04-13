@@ -445,9 +445,10 @@ function end() {
 );
 
     if (allFound) {
-      overlay.style.opacity = 1;
-      setTimeout(() => overlay.style.opacity = 0, 2400);
-    }
+  setTimeout(() => {
+    document.getElementById("winOverlay").classList.add("show");
+  }, 500);
+}
   } else {
     line.remove();
   }
