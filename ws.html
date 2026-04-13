@@ -59,6 +59,7 @@ h1 {
   padding: 12px;
   width: 100%;
   box-sizing: border-box;
+  transform-origin: top center;
 }
 
 .grid {
@@ -223,6 +224,16 @@ const dotsEl = document.getElementById("dots");
   nextGame(); // go to next puzzle
 });
 
+function scaleGridToFit() {
+  const wrapper = document.querySelector(".grid-wrapper");
+
+  const gridWidth = COLS * CELL + (COLS - 1) * GAP + 24; // + padding
+  const screenWidth = window.innerWidth;
+
+  const scale = Math.min(1, screenWidth / gridWidth);
+
+  wrapper.style.transform = `scale(${scale})`;
+}
   
 async function loadGames() {
   const response = await fetch(
