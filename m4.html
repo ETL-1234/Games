@@ -20,17 +20,28 @@ body {
   justify-content: center;
 }
 
+  html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden; /* removes scrollbars */
+}
+
 .app {
   max-width: 420px;
   width: 100%;
-  padding: 20px;
+  height: 100vh;              /* lock to screen */
+  display: flex;
+  flex-direction: column;     /* stack header + grid */
+  box-sizing: border-box;
+  padding: 10px;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 40px 12px 20px; /* pulls inward */
+  padding: 10px 12px;
+  flex-shrink: 0;
 }
 
 .title {
@@ -43,6 +54,7 @@ body {
 }
 
 .grid {
+  flex: 1;                    /* fills remaining space */
   display: grid;
   gap: 8px;
   justify-content: center;
