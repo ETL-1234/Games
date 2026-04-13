@@ -519,53 +519,53 @@ WORD CHECK
 ================================ */
 function checkWords(){
 
-const cells=[...document.querySelectorAll(".word-cell")];
+  const cells=[...document.querySelectorAll(".word-cell")];
 
-let cols = 8;
-if(currentGame && currentGame.maxletters == 6){
-  cols = 6;
-}
+  let cols = 8;
+  if(currentGame && currentGame.maxletters == 6){
+    cols = 6;
+  }
 
-for(let r=0;r<cells.length;r+=cols){
+  let newWordFound = false;
 
-let word="";
-let rowCells=cells.slice(r,r+cols);
+  for(let r=0;r<cells.length;r+=cols){
 
-rowCells.forEach(c=>{
-word+=c.textContent||"";
-});
+    let word="";
+    let rowCells=cells.slice(r,r+cols);
 
-if(words.includes(word) && !foundWords.includes(word)){
- 
-if(bonusWords.includes(word)){
-  triggerBonusGlow(rowCells);
-}
+    rowCells.forEach(c=>{
+      word+=c.textContent||"";
+    });
 
-foundWords.push(word);
+    if(words.includes(word) && !foundWords.includes(word)){
 
-rowCells.forEach(c=>{
-  c.style.background="rgba(0,0,0,0.15)";
-  c.dataset.locked = "true";
-});
+      if(bonusWords.includes(word)){
+        triggerBonusGlow(rowCells);
+      }
 
-score+=word.length-1;
-scoreEl.textContent=String(score).padStart(2,"0");
+      foundWords.push(word);
+      newWordFound = true;
 
-    // CHECK IF GAME COMPLETE
-if (foundWords.length === words.length) {
+      rowCells.forEach(c=>{
+        c.style.background="rgba(0,0,0,0.15)";
+        c.dataset.locked = "true";
+      });
 
-  const label = currentGame.maxletters == 6
-    ? "Words Completed"   // Easy
-    : "Words Completed";  // Challenge (same label, cleaner UX)
+      score+=word.length-1;
+      scoreEl.textContent=String(score).padStart(2,"0");
+    }
+  }
 
-  document.getElementById("finalScore").textContent =
-    `${foundWords.length} ${label}`;
+  // ✅ NOW CHECK COMPLETION ONCE (after loop)
+  if(newWordFound && foundWords.length === words.length){
 
-  setTimeout(() => {
-    document.getElementById("winOverlay").classList.add("show");
-  }, 500);
-}
+    document.getElementById("finalScore").textContent =
+      `Score ${score}`;
 
+    setTimeout(() => {
+      document.getElementById("winOverlay").classList.add("show");
+    }, 500);
+  }
 }
 }
 }
