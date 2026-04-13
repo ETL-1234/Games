@@ -383,7 +383,10 @@ function createPuzzleBoard(boardEl, imageUrl) {
       empty = move;
     }
 
-    draw();
+    hasWon = false;
+   draw();
+
+  gameStarted = true; // THIS is the key fix
   }
 
   function moveBySwipe(direction) {
