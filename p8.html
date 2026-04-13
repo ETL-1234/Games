@@ -426,7 +426,9 @@ function createPuzzleBoard(boardEl, imageUrl) {
       boardEl.appendChild(el);
     });
 
-  if (isSolved()) {
+if (isSolved() && !hasWon) {
+  hasWon = true;
+
   const tiles = boardEl.querySelectorAll(".tile");
 
   tiles.forEach((tile, i) => {
@@ -436,11 +438,10 @@ function createPuzzleBoard(boardEl, imageUrl) {
     }, i * 50);
   });
 
-  // 👉 SHOW OVERLAY AFTER ANIMATION
   setTimeout(() => {
     document.getElementById("winOverlay").classList.add("show");
   }, 600);
-} 
+}
   }
 
   // Touch handling PER BOARD
