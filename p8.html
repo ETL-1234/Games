@@ -263,7 +263,8 @@ function setupSlider() {
     }
   }
 
-  function prevSlide() {
+  // function prevSlide
+    window.prevSlide = function () {
     if (isAnimating) return;
     isAnimating = true;
 
