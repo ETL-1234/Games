@@ -183,6 +183,10 @@ const GRID = 3;
 
 const EASY_MOVES = [10, 12];
 
+  document.getElementById("winOverlay").addEventListener("click", () => {
+  document.getElementById("winOverlay").classList.remove("show");
+  nextSlide(); // go to next puzzle
+});
 
 /* ---------- FETCH IMAGE FROM SUPABASE ---------- */
 async function fetchPuzzleImage() {
