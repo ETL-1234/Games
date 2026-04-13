@@ -388,6 +388,13 @@ currentIndex=i;
 const game=games[i];
 currentGame=game;
 
+  // determine completion target
+if(game.gameid.endsWith("a")){
+  targetWords = 15; // easy
+} else {
+  targetWords = 18; // challenge
+}
+
 title.textContent=game.name;
 
 app.style.backgroundImage=`url(${game.bgimageurl})`;
