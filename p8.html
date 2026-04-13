@@ -384,9 +384,9 @@ function createPuzzleBoard(boardEl, imageUrl) {
     }
 
     hasWon = false;
+    gameStarted = true; // THIS is the key fix
    draw();
-
-  gameStarted = true; // THIS is the key fix
+ 
   }
 
   function moveBySwipe(direction) {
