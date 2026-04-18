@@ -224,7 +224,10 @@ function scaleGridToFit() {
   wrapper.style.margin = "0 auto";  // ensures centering after scaling
 
   // fix vertical overflow caused by scaling
-  wrapper.style.height = `${(gridWidth * scale)}px`;
+ const rows = LETTERS.length / COLS;
+ const gridHeight = rows * CELL + (rows - 1) * GAP + 24;
+
+wrapper.style.height = `${gridHeight * scale}px`;
 }
   
   
