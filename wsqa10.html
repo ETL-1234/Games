@@ -59,7 +59,9 @@ h1 {
 .grid-wrapper {
   position: relative;
   padding: 12px;
-  width: 100%;
+  width: fit-content;   /* KEY FIX */
+  max-width: 100%;
+  margin: 0 auto;       /* centers it */
   box-sizing: border-box;
   transform-origin: top center;
 }
