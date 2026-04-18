@@ -221,6 +221,7 @@ function scaleGridToFit() {
   const scale = Math.min(1, (screenWidth - 20) / gridWidth);
 
   wrapper.style.transform = `scale(${scale})`;
+  wrapper.style.margin = "0 auto";  // ensures centering after scaling
 
   // fix vertical overflow caused by scaling
   wrapper.style.height = `${(gridWidth * scale)}px`;
