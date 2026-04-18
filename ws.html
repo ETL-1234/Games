@@ -235,6 +235,7 @@ function scaleGridToFit() {
   const scale = Math.min(1, screenWidth / gridWidth);
 
   wrapper.style.transform = `scale(${scale})`;
+  wrapper.style.margin = "0 auto";
 }
   
 async function loadGames() {
