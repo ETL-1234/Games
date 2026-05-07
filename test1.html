@@ -2,8 +2,8 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Word Search</title>
-  
+<title>Word Search Questions</title>
+
 <style>
 :root {
   --bg-color: #dbe7e0;
@@ -14,27 +14,29 @@
 
 body {
   margin: 0;
-  padding: 10px 0px 20px;
+  padding: 10px 0px 20px 0px;
   font-family:"Inter",Inter,Arial,sans-serif;
   background: var(--bg-color);
-  
+  display: flex;
+  justify-content: center;
+
+  overflow-x: hidden;   /* keep this */
+  overflow-y: auto;     /* allow vertical scroll */
+}
+
+  html, body {
   overflow-x: hidden;
-  overflow-y: auto; /* enable scroll */
+  overflow-y: auto;
+
+  scrollbar-width: none; /* Firefox */
 }
 
-/* hide scrollbar but keep scroll */
+html::-webkit-scrollbar,
 body::-webkit-scrollbar {
-  display: none;
-}
-
-body {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  display: none; /* Chrome/Safari */
 }
 
 .app {
-  width: 100%;
-  margin: 0 auto;
   max-width: 100%;
   margin: 0;
 
@@ -42,29 +44,25 @@ body {
   flex-direction: column;
   align-items: center;
 
-  padding-left: clamp(12px, 4vw, 24px);
-  padding-right: clamp(12px, 4vw, 24px);
+  padding-left: 16px;
+  padding-right: 16px;
 
   box-sizing: border-box;
 }
 
 h1 {
   text-align: center;
-  margin: 20px 0 12px 0;
+  margin: 30px 0 16px 0;
   font-size: 20px;
 }
 
 .grid-wrapper {
   position: relative;
   padding: 12px;
+  width: fit-content;   /* KEY FIX */
+  max-width: 100%;
+  margin: 0 auto;       /* centers it */
   box-sizing: border-box;
-
-  display: flex;
-  justify-content: center;
-
-  width: 100%;
-  overflow: visible;
-
   transform-origin: top center;
 }
 
@@ -95,9 +93,11 @@ svg {
 .word-list {
   margin-top: 18px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px 24px;
+  grid-template-columns: 1fr;
+  gap: 8px;
   font-size: 14px;
+  width: 100%;
+  max-width: 360px; /* optional: keeps line length nice */
 }
 
 .word {
@@ -116,7 +116,7 @@ svg {
   border-radius: 2px;
 }
 
-.win-overlay {
+  .win-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.4);
@@ -142,23 +142,6 @@ svg {
   letter-spacing: 1px;
 }
 
-  /* ===== FORCE HIDE ALL SCROLLBARS ===== */
-
-/* Chrome / Safari / iOS / Android */
-*::-webkit-scrollbar {
-  display: none;
-}
-
-/* Firefox */
-* {
-  scrollbar-width: none;
-}
-
-/* IE / Edge */
-* {
-  -ms-overflow-style: none;
-}
-
 .dots {
   display: flex;
   justify-content: center;
@@ -181,7 +164,7 @@ svg {
 <div class="app">
 
 <div class="dots" id="dots"></div>
-
+  
 <h1 id="gameTitle">Loading...</h1>
 
 <div class="grid-wrapper" id="swipeArea">
@@ -190,8 +173,7 @@ svg {
   </div>
 
 <div class="word-list" id="wordList"></div>
-
-  <div id="winOverlay" class="win-overlay">
+<div id="winOverlay" class="win-overlay">
   <div class="win-text">
     <div>Awesome</div>
     <div>Completed</div>
@@ -217,6 +199,7 @@ let isSwipingGrid = false;
 
 let LETTERS = [];
 let WORDS = [];
+let ANSWERS = [];
 
 const grid = document.getElementById("grid");
 const svg = document.getElementById("svg");
@@ -224,8 +207,7 @@ const wordList = document.getElementById("wordList");
 const overlay = document.getElementById("overlayText");
 const dotsEl = document.getElementById("dots");
 
-
-  document.getElementById("winOverlay").addEventListener("click", () => {
+document.getElementById("winOverlay").addEventListener("click", () => {
   document.getElementById("winOverlay").classList.remove("show");
   nextGame(); // go to next puzzle
 });
@@ -233,18 +215,25 @@ const dotsEl = document.getElementById("dots");
 function scaleGridToFit() {
   const wrapper = document.querySelector(".grid-wrapper");
 
-  const gridWidth = COLS * CELL + (COLS - 1) * GAP + 24; // + padding
+  const gridWidth = COLS * CELL + (COLS - 1) * GAP + 24; // includes padding
   const screenWidth = window.innerWidth;
 
-  const scale = Math.min(1, screenWidth / gridWidth);
+  const scale = Math.min(1, (screenWidth - 20) / gridWidth);
 
   wrapper.style.transform = `scale(${scale})`;
-  wrapper.style.width = `${gridWidth * scale}px`;
-  }
+  wrapper.style.margin = "0 auto";  // ensures centering after scaling
+
+  // fix vertical overflow caused by scaling
+ const rows = LETTERS.length / COLS;
+ const gridHeight = rows * CELL + (rows - 1) * GAP + 24;
+
+wrapper.style.height = `${gridHeight * scale}px`;
+}
+  
   
 async function loadGames() {
   const response = await fetch(
-    `${SUPABASE_URL}/rest/v1/GamesWordSearch?active=eq.true&type=eq.20&order=startdate.desc`,
+    `${SUPABASE_URL}/rest/v1/GamesWordSearch?active=eq.true&type=eq.101&order=startdate.desc`,
     {
       headers: {
         apikey: SUPABASE_ANON_KEY,
@@ -269,7 +258,8 @@ function initGame(index) {
   const game = games[index];
 
   LETTERS = game.gridlettersjson.flat();
-  WORDS = game.wordjson;
+  WORDS = game.wordjson; // array of objects
+  ANSWERS = WORDS.map(w => w.answer);
 
   document.documentElement.style.setProperty('--bg-color', game.bgcolor);
   document.documentElement.style.setProperty('--draw-color', game.drawcolor);
@@ -304,11 +294,12 @@ function buildGrid() {
 
 function buildWords() {
   wordList.innerHTML = "";
-  WORDS.forEach(w => {
+
+  WORDS.forEach((w, index) => {
     const el = document.createElement("div");
     el.className = "word";
-    el.id = "word-" + w;
-    el.textContent = w;
+    el.id = "word-" + w.answer; // IMPORTANT: still link to answer
+    el.textContent = (index + 1) + ". " + w.question;
     wordList.appendChild(el);
   });
 }
@@ -370,13 +361,14 @@ swipeArea.addEventListener("touchend", e => {
 
 }, { passive: true });
 
+
 /* ===== YOUR ORIGINAL GAME LOGIC BELOW (UNCHANGED) ===== */
 
 let startIndex = null;
 let direction = null;
 let path = [];
 let line = null;
-
+ 
 function indexToRC(i) {
   return { r: Math.floor(i / COLS), c: i % COLS };
 }
@@ -384,12 +376,10 @@ function indexToRC(i) {
 function getDir(a, b) {
   const dr = b.r - a.r;
   const dc = b.c - a.c;
-
   if (dr === 0 && dc >= 1) return { dr: 0, dc: 1 };   // →
   if (dc === 0 && dr >= 1) return { dr: 1, dc: 0 };   // ↓
-  if (dr >= 1 && dc >= 1) return { dr: 1, dc: 1 };    // ↘
-  if (dr >= 1 && dc <= -1) return { dr: 1, dc: -1 };  // ↙
-
+  if (dr >= 1 && dc >= 1) return { dr: 1, dc: 1 };     // ↘
+   if (dr >= 1 && dc <= -1) return { dr: 1, dc: -1 };  // ↙
   return null;
 }
 
@@ -469,14 +459,14 @@ function end() {
 
   const word = path.map(i => LETTERS[i]).join("");
 
-  if (WORDS.includes(word)) {
+  if (ANSWERS.includes(word)) {
     document.getElementById("word-" + word)?.classList.add("found");
 
-    const allFound = WORDS.every(w =>
-      document.getElementById("word-" + w)?.classList.contains("found")
-    );
+  const allFound = ANSWERS.every(a =>
+  document.getElementById("word-" + a)?.classList.contains("found")
+);
 
-   if (allFound) {
+    if (allFound) {
   setTimeout(() => {
     document.getElementById("winOverlay").classList.add("show");
   }, 500);
@@ -489,7 +479,7 @@ function end() {
   path = [];
   direction = null;
   startIndex = null;
-  isSwipingGrid = false;
+  isSwipingGrid = false
 }
 
 /* ===== GRID DRAWING INPUT (PUZZLE ONLY) ===== */
@@ -508,7 +498,7 @@ grid.addEventListener("touchmove", e => {
 }, { passive: false });
 
 grid.addEventListener("touchend", end);
-
+  
 loadGames();
 </script>
 </body>
