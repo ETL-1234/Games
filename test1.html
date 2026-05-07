@@ -35,15 +35,16 @@ body::-webkit-scrollbar {
 }
 
 .app {
+  width: 100%;
   max-width: 100%;
-  margin: 0;
+  margin: 0 auto;
 
   display: flex;
   flex-direction: column;
   align-items: center;
 
-  padding-left: 16px;
-  padding-right: 16px;
+  padding-left: clamp(12px, 4vw, 24px);
+  padding-right: clamp(12px, 4vw, 24px);
 
   box-sizing: border-box;
 }
@@ -57,10 +58,14 @@ h1 {
 .grid-wrapper {
   position: relative;
   padding: 12px;
-  width: fit-content;   /* KEY FIX */
-  max-width: 100%;
-  margin: 0 auto;       /* centers it */
   box-sizing: border-box;
+
+  display: flex;
+  justify-content: center;
+
+  width: 100%;
+  overflow: visible;
+
   transform-origin: top center;
 }
 
