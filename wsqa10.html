@@ -14,14 +14,12 @@
 
 body {
   margin: 0;
-  padding: 10px 0px 20px 0px;
+  padding: 10px 0 20px;
   font-family:"Inter",Inter,Arial,sans-serif;
   background: var(--bg-color);
-  display: flex;
-  justify-content: center;
 
-  overflow-x: hidden;   /* keep this */
-  overflow-y: auto;     /* allow vertical scroll */
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
   html, body {
@@ -37,15 +35,16 @@ body::-webkit-scrollbar {
 }
 
 .app {
+  width: 100%;
   max-width: 100%;
-  margin: 0;
+  margin: 0 auto;
 
   display: flex;
   flex-direction: column;
   align-items: center;
 
-  padding-left: 16px;
-  padding-right: 16px;
+  padding-left: clamp(12px, 4vw, 24px);
+  padding-right: clamp(12px, 4vw, 24px);
 
   box-sizing: border-box;
 }
@@ -59,10 +58,14 @@ h1 {
 .grid-wrapper {
   position: relative;
   padding: 12px;
-  width: fit-content;   /* KEY FIX */
-  max-width: 100%;
-  margin: 0 auto;       /* centers it */
   box-sizing: border-box;
+
+  display: flex;
+  justify-content: center;
+
+  width: 100%;
+  overflow: visible;
+
   transform-origin: top center;
 }
 
@@ -221,8 +224,8 @@ function scaleGridToFit() {
   const scale = Math.min(1, (screenWidth - 20) / gridWidth);
 
   wrapper.style.transform = `scale(${scale})`;
-  wrapper.style.margin = "0 auto";  // ensures centering after scaling
-
+  wrapper.style.width = `${gridWidth * scale}px`;
+  
   // fix vertical overflow caused by scaling
  const rows = LETTERS.length / COLS;
  const gridHeight = rows * CELL + (rows - 1) * GAP + 24;
