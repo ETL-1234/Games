@@ -272,8 +272,7 @@ function buildGrid() {
       } else {
         cell.addEventListener("click", () => selectCell(cell));
 cell.addEventListener("touchstart", (e) => {
-  e.stopPropagation();
-  selectCell(cell);
+    selectCell(cell);
 });
       }
 
