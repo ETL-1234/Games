@@ -57,10 +57,14 @@ h1 {
 .grid-wrapper {
   position: relative;
   padding: 12px;
-  width: fit-content;   /* KEY CHANGE */
-  max-width: 100%;      /* prevents overflow on small screens */
-  margin: 0 auto;       /* centers it */
   box-sizing: border-box;
+
+  display: flex;
+  justify-content: center;
+
+  width: 100%;
+  overflow: visible;
+
   transform-origin: top center;
 }
 
