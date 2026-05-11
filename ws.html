@@ -269,7 +269,7 @@ function scaleGridToFit() {
   
 async function loadGames() {
   const response = await fetch(
-    `${SUPABASE_URL}/rest/v1/GamesWordSearch?active=eq.true&type=eq.20&order=startdate.desc`,
+    `${SUPABASE_URL}/rest/v1/games_wordsearch20_current`,
     {
       headers: {
         apikey: SUPABASE_ANON_KEY,
