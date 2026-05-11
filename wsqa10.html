@@ -261,7 +261,7 @@ wrapper.style.height = `${gridHeight * scale}px`;
   
 async function loadGames() {
   const response = await fetch(
-    `${SUPABASE_URL}/rest/v1/GamesWordSearch?active=eq.true&type=eq.101&order=startdate.desc`,
+    `${SUPABASE_URL}/rest/v1/games_wordsearch10_current`,
     {
       headers: {
         apikey: SUPABASE_ANON_KEY,
