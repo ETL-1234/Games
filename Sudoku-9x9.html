@@ -48,23 +48,83 @@ body {
   grid-template-rows: repeat(9, 1fr);
   width: 100%;
   height: 100%;
-  background: white;
+
+  /* Board appearance */
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.95),
+    rgba(245,245,245,0.98)
+  );
+
   border: 2px solid var(--grid-color);
+  border-radius: 18px;
+  padding: 6px;
+  gap: 3px;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  /* Soft board shadow */
+  box-shadow:
+    0 8px 20px rgba(0,0,0,0.10),
+    0 1px 0 rgba(255,255,255,0.9) inset;
 }
 
 .cell {
-  border: 1px solid var(--grid-color);
   display: flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
+
+  /* Tile appearance */
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,1) 0%,
+    rgba(247,247,247,1) 100%
+  );
+
+  border: 1px solid rgba(0,0,0,0.10);
+  border-radius: 6px;
+
+  /* 3D depth */
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.08),
+    0 1px 0 rgba(255,255,255,0.9) inset,
+    0 -1px 2px rgba(0,0,0,0.03) inset;
+
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.cell.major-right { border-right: 3px solid var(--grid-color); }
-.cell.major-bottom { border-bottom: 3px solid var(--grid-color); }
+.cell.major-right {
+  border-right: 3px solid var(--grid-color);
+}
 
-.cell img { width: 78%; height: 78%; object-fit: contain; }
+.cell.major-bottom {
+  border-bottom: 3px solid var(--grid-color);
+}
 
-.cell.selected { background: var(--selection-color); }
+.cell img {
+  width: 78%;
+  height: 78%;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.08));
+}
+
+.cell.selected {
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(255,255,255,1),
+      rgba(245,248,252,1)
+    ),
+    var(--selection-color);
+
+  box-shadow:
+    0 0 0 3px rgba(60, 90, 140, 0.25),
+    0 4px 10px rgba(0,0,0,0.12),
+    0 1px 0 rgba(255,255,255,0.9) inset;
+
+  transform: scale(0.98);
+}
 
 .overlay {
   position: absolute;
