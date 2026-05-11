@@ -77,12 +77,37 @@ h1 {
 }
 
 .cell {
-  background: #fff;
-  border: 1px solid var(--grid-border);
+  /* Base appearance */
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,1) 0%,
+    rgba(248,248,248,1) 100%
+  );
+
+  border: 1px solid rgba(0,0,0,0.18);
+  border-radius: 8px;
+
+  /* Layout (unchanged) */
   display: flex;
   align-items: center;
   justify-content: center;
   user-select: none;
+  box-sizing: border-box;
+
+  /* Letter styling */
+  font-weight: 600;
+  font-size: 18px;
+  color: #222;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.9);
+
+  /* 3D depth */
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.12),        /* outer shadow */
+    0 1px 0 rgba(255,255,255,0.9) inset, /* top highlight */
+    0 -1px 2px rgba(0,0,0,0.05) inset;   /* bottom inner shading */
+
+  /* Smooth rendering */
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 svg {
