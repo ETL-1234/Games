@@ -327,8 +327,12 @@ function initGame(index) {
   const game = games[index];
 
   //  ANALYTICS
-  track("play", {
-  content: CONTENT_NAME
+
+  let hasTrackedPlay = false;
+  
+  if (!hasTrackedPlay) {
+  track("play", { content: CONTENT_NAME });
+  hasTrackedPlay = true;
 });
 
   LETTERS = game.gridlettersjson.flat();
