@@ -306,6 +306,10 @@ async function loadGames() {
 
   games = await response.json();
 
+  //  ANALYTICS
+track("view");
+
+
   if (!games.length) {
     document.getElementById("gameTitle").textContent = "No Games Found";
     return;
