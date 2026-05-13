@@ -319,6 +319,11 @@ function initGame(index) {
   currentIndex = index;
   const game = games[index];
 
+  //  ANALYTICS
+  track("play", {
+  game: game.name
+});
+
   LETTERS = game.gridlettersjson.flat();
   WORDS = game.wordjson;
 
