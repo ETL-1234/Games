@@ -232,6 +232,32 @@ svg {
 const SUPABASE_URL = "https://tppyzexttkuvcobbbmaz.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_VZiTsc0JGVx6tVf2Zu-9uQ_-FwjGpQW";
 
+  //  ANALYTICS
+const APP_NAME = "ETL"; 
+const CONTENT_NAME = "Game Word Search 20"; 
+
+async function track(eventType, metadata = {}) {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/analytics_use`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        Prefer: "return=minimal"
+      },
+      body: JSON.stringify({
+        app_name: APP_NAME,
+        game_name: CONTENT_NAME,
+        event_type: eventType,
+        metadata: metadata
+      })
+    });
+  } catch (err) {
+    console.log("Analytics error:", err);
+  }
+}
+
 const COLS = 10;
 const CELL = 34;
 const GAP = 4;
