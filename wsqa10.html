@@ -543,9 +543,14 @@ function end() {
     if (allFound) {
 
       //  ANALYTICS
-   track("completed", {
-    content: games[currentIndex].name
-  });
+  const timeSpentSeconds = Math.floor(
+  (Date.now() - gameStartTime) / 1000
+);
+
+track("completed", {
+  content: games[currentIndex].name,
+  time_spent_seconds: timeSpentSeconds
+});
       
   setTimeout(() => {
     document.getElementById("winOverlay").classList.add("show");
