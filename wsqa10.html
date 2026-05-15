@@ -539,6 +539,12 @@ function end() {
 );
 
     if (allFound) {
+
+      //  ANALYTICS
+   track("completed", {
+    content: games[currentIndex].name
+  });
+      
   setTimeout(() => {
     document.getElementById("winOverlay").classList.add("show");
   }, 500);
@@ -554,10 +560,7 @@ function end() {
   isSwipingGrid = false
 }
 
-    //  ANALYTICS
-   track("completed", {
-    content: games[currentIndex].name
-  });
+  
 
 /* ===== GRID DRAWING INPUT (PUZZLE ONLY) ===== */
 
