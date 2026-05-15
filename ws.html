@@ -271,6 +271,7 @@ let WORDS = [];
 
   //  ANALYTICS
   let hasTrackedPlay = false;
+  let gameStartTime = null; 
 
 const grid = document.getElementById("grid");
 const svg = document.getElementById("svg");
@@ -330,6 +331,7 @@ function initGame(index) {
   const game = games[index];
 
   //  ANALYTICS
+  gameStartTime = Date.now();
   
   if (!hasTrackedPlay) {
   track("play", { content: CONTENT_NAME });
@@ -546,10 +548,15 @@ function end() {
 
    if (allFound) {
 
-     //  ANALYTICS
-   track("completed", {
-    content: games[currentIndex].name
-  });
+    //  ANALYTICS
+const timeSpentSeconds = Math.floor(
+  (Date.now() - gameStartTime) / 1000
+);
+
+track("completed", {
+  content: games[currentIndex].name,
+  time_spent_seconds: timeSpentSeconds
+});
      
   setTimeout(() => {
     document.getElementById("winOverlay").classList.add("show");
