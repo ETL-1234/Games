@@ -324,6 +324,7 @@ function initGame(index) {
   const game = games[index];
 
     //  ANALYTICS
+  gameStartTime = Date.now();
   
   if (!hasTrackedPlay) {
   track("play", { content: CONTENT_NAME });
