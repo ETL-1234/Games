@@ -327,6 +327,16 @@ function initGame(index) {
   currentIndex = index;
   const game = games[index];
 
+  // ANALYTICS
+gameStartTime = Date.now();
+
+if (!hasTrackedPlay) {
+  track("play", {
+    content: CONTENT_NAME
+  });
+  hasTrackedPlay = true;
+}
+
   // Parse JSON fields from Supabase
   const parsedGrid = game.GridJson;
   const parsedImages = game.ImagesJson;
