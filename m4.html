@@ -435,6 +435,16 @@ function checkMatch() {
 
     if (matchedPairs === cards.length / 2) {
 
+      // ANALYTICS
+  const timeSpentSeconds = Math.floor(
+    (Date.now() - gameStartTime) / 1000
+  );
+
+  track("completed", {
+    content: games[currentIndex].title,
+    time_spent_seconds: timeSpentSeconds
+  });
+
      document.getElementById("finalMoves").textContent = `${moves} Flips`;
      setTimeout(() => {
    document.getElementById("winOverlay").classList.add("show");
