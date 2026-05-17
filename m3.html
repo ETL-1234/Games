@@ -295,6 +295,10 @@ if (games.length) {
 
 async function initGame(index) {
   currentIndex = index;
+
+  // ANALYTICS
+hasTrackedPlay = false;
+
   const game = games[index];
 
   document.documentElement.style.setProperty('--bg-color', game.bgcolor);
