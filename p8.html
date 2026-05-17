@@ -240,6 +240,15 @@ async function fetchPuzzleImage() {
     if (data && data.length > 0) {
       PUZZLES = data;
       console.log("Loaded puzzles:", PUZZLES);
+
+ // ANALYTICS
+  if (PUZZLES.length) {
+    track("view", {
+      content: CONTENT_NAME
+    });
+  }
+
+      
     } else {
       throw new Error("No active puzzles found.");
     }
