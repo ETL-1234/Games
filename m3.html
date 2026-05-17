@@ -276,6 +276,14 @@ async function loadGames() {
     return;
   }
 
+// ANALYTICS
+if (games.length) {
+  track("view", {
+    content: CONTENT_NAME
+  });
+}
+
+  
   buildDots();
   initGame(0);
 }
