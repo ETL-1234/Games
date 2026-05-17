@@ -301,6 +301,16 @@ hasTrackedPlay = false;
 
   const game = games[index];
 
+  // ANALYTICS
+gameStartTime = Date.now();
+
+if (!hasTrackedPlay) {
+  track("play", {
+    content: CONTENT_NAME
+  });
+  hasTrackedPlay = true;
+}
+
   document.documentElement.style.setProperty('--bg-color', game.bgcolor);
   document.documentElement.style.setProperty('--text-color', game.textcolor);
   document.getElementById("gameTitle").textContent = game.title;
