@@ -510,8 +510,12 @@ const timeSpentSeconds = Math.floor(
   (Date.now() - gameStartTime) / 1000
 );
 
+// Ensure we always reference a real puzzle, even if currentIndex
+// temporarily points to the cloned slide used for looping.
+const realIndex = currentIndex % PUZZLES.length;
+
 track("completed", {
-  content: PUZZLES[currentIndex].name,
+  content: PUZZLES[realIndex].name,
   time_spent_seconds: timeSpentSeconds
 });
   
