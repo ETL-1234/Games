@@ -275,6 +275,10 @@ async function track(eventType, metadata = {}) {
 let games = [];
 let currentIndex = 0;
 
+  // ANALYTICS
+let hasTrackedPlay = false;
+let gameStartTime = null;
+
 let images = [null];
 let startPuzzle = [];
 let puzzle = [];
