@@ -436,6 +436,17 @@ function createPuzzleBoard(boardEl, imageUrl) {
 
     hasWon = false;
     gameStarted = true; // THIS is the key fix
+
+    // ANALYTICS
+gameStartTime = Date.now();
+
+if (!hasTrackedPlay) {
+  track("play", {
+    content: CONTENT_NAME
+  });
+  hasTrackedPlay = true;
+}
+    
    draw();
  
   }
