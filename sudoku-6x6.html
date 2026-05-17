@@ -512,7 +512,17 @@ function checkCompletion() {
     }
   }
 
-  document.getElementById("winOverlay").classList.remove("hidden");
+ // ANALYTICS
+const timeSpentSeconds = Math.floor(
+  (Date.now() - gameStartTime) / 1000
+);
+
+track("completed", {
+  content: games[currentIndex].Name,
+  time_spent_seconds: timeSpentSeconds
+});
+
+document.getElementById("winOverlay").classList.remove("hidden");
 }
 
   document.getElementById("winOverlay").addEventListener("click", () => {
