@@ -495,16 +495,23 @@ if (!hasTrackedPlay) {
       const c = index % GRID;
       el.style.transform = `translate(${c * 100}%, ${r * 100}%)`;
 
-      const img = document.createElement("img");
-      const ir = Math.floor((tile - 1) / GRID);
-      const ic = (tile - 1) % GRID;
+     const img = document.createElement("img");
+const ir = Math.floor((tile - 1) / GRID);
+const ic = (tile - 1) % GRID;
 
-      img.src = imageUrl;
-      img.style.left = `-${ic * 100}%`;
-      img.style.top = `-${ir * 100}%`;
+img.src = imageUrl;
+img.style.left = `-${ic * 100}%`;
+img.style.top = `-${ir * 100}%`;
 
-      el.appendChild(img);
-      boardEl.appendChild(el);
+// NUMBER LABEL
+const number = document.createElement("div");
+number.className = "tile-number";
+number.textContent = tile;
+
+el.appendChild(img);
+el.appendChild(number);
+
+boardEl.appendChild(el);
     });
 
 if (gameStarted && isSolved() && !hasWon) {
