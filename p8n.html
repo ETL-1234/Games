@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>Puzzle 8</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    font-family: 'Inter', sans-serif;
+  }
+
+  html, body {
+  height: 100%;
+}
+
+    .board {
+  width: 90vmin;
+  height: 90vmin;
+  max-height: calc(100vh - 150px); /* leaves room for title + dots */
+  position: relative;
+  margin-bottom: 20px; /* space below tiles */
+}
+
+  .tile {
+    position: absolute;
+    width: calc(100% / 3);
+    height: calc(100% / 3);
+    transition: transform 160ms ease-out, box-shadow 0.5s ease-in-out;
+    overflow: hidden;
+    border-radius: 6px;
+  }
+
+  .tile img {
+    width: 300%;
+    height: 300%;
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .tile.completed {
+    box-shadow: 0 0 20px 10px rgba(255,255,255,0.3);
+  }
+
+ .puzzle-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* start content at top */
+  padding-top: 40px; /* adds space above title */
+  padding-bottom: 80px; /* space below board */
+  }
+
+.puzzle-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 30px;       /* space above title */
+  margin-bottom: 30px; /* space between title and puzzle board */
+  color: white;
+}
+
+  #puzzleWrapper {
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
+}
+
+#puzzleTrack {
+  display: flex;
+  transition: transform 350ms ease-in-out;
+  width: 100%;
+  height: 100vh; /* <- add this */
+}
+
+.puzzle-slide {
+  min-width: 100vw;
+  height: 100%;
+  display: flex;           /* flex container */
+  flex-direction: column;  /* stack puzzle and dots */
+  justify-content: flex-start; /* start at top, allow padding-top to work */
+  align-items: center;     /* horizontal centering */
+  padding-top: 0px;       /* space above tile */
+  padding-bottom: 30px;
+  transition: background-color 350ms ease-in-out;
+ }
+
+  #paginationDots {
+  text-align: center;
+  margin-top: 0px;  /* space from puzzle */
+  margin-bottom: 0px; /* extra space from bottom */
+  padding: 0;
+  transition: background-color 350ms ease-in-out;
+}
+
+  /* ===== WIN OVERLAY ===== */
+.win-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 20;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.win-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.win-text {
+  color: rgba(255,255,255,0.9);
+  font-size: 42px;
+  text-align: center;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin: 0 4px;
+  background: #ccc;
+  border-radius: 50%;
+}
+
+.active-dot {
+  background: #333;
+}
+
+  .board {
+  touch-action: none;
+} 
+  
+ </style>
+</head>
+
+<body>
+
+<div id="paginationDots"></div>
+<div id="puzzleWrapper">
+<div id="puzzleTrack"></div>
+
+<div id="winOverlay" class="win-overlay">
+  <div class="win-text">
+    <div>Awesome</div>
+    <div>Completed</div>
+    <div style="font-size:16px; margin-top:15px; font-weight:400;">
+      Tap to continue
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+
+<script>
+/* ============ SUPABASE CONFIG ============ */
+const SUPABASE_URL = "https://tppyzexttkuvcobbbmaz.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_VZiTsc0JGVx6tVf2Zu-9uQ_-FwjGpQW";
+
+  // ANALYTICS
+const APP_NAME = "ETL";
+
+// Automatically use the text from the <title> tag
+const CONTENT_NAME = document.title;
+
+async function track(eventType, metadata = {}) {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/analytics_use`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        Prefer: "return=minimal"
+      },
+      body: JSON.stringify({
+        app_name: APP_NAME,
+        title_name: CONTENT_NAME,
+        event_type: eventType,
+        metadata: metadata
+      })
+    });
+  } catch (err) {
+    console.log("Analytics error:", err);
+  }
+}
+
+  
+
+let PUZZLES = [];
+
+  // ANALYTICS
+let hasTrackedPlay = false;
+let gameStartTime = null;
+/* ========================================= */
+
+const GRID = 3;
+
+const EASY_MOVES = [10, 12];
+
+  document.getElementById("winOverlay").addEventListener("click", () => {
+  document.getElementById("winOverlay").classList.remove("show");
+  nextSlide(); // go to next puzzle
+});
+
+/* ---------- FETCH IMAGE FROM SUPABASE ---------- */
+async function fetchPuzzleImage() {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/puzzle_current_3x3?select=id,type,active,imageurl,name,bgcolor`,
+      {
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+        }
+      }
+    );
+
+    const data = await res.json();
+
+    if (data && data.length > 0) {
+      PUZZLES = data;
+      console.log("Loaded puzzles:", PUZZLES);
+
+ // ANALYTICS
+  if (PUZZLES.length) {
+    track("view", {
+      content: CONTENT_NAME
+    });
+  }
+
+      
+    } else {
+      throw new Error("No active puzzles found.");
+    }
+
+  } catch (err) {
+    console.error("Error loading puzzles:", err);
+  }
+}
+
+  
+/* ---------- Helpers ---------- */
+let currentIndex = 0;
+let totalSlides = 0;
+let isSwipingBoard = false;
+
+function setupSlider() {
+  const track = document.getElementById("puzzleTrack");
+
+  // Clone first slide for seamless loop
+  const firstSlide = track.children[0].cloneNode(true);
+  track.appendChild(firstSlide);
+  totalSlides = track.children.length; // includes the clone
+
+  createDots();
+  updateDotsBackground();
+
+  let startX = 0;
+  let isAnimating = false;
+
+  function updateSlider(duration = 0.4) {
+    track.style.transition = `transform ${duration}s ease`;
+    track.style.transform = `translateX(-${currentIndex * 100}vw)`;
+    updateDots();
+     }
+  // function nextSlide
+  window.nextSlide = function () {
+    if (isAnimating) return;
+    isAnimating = true;
+
+    currentIndex++;
+
+    // ANALYTICS
+hasTrackedPlay = false;
+    
+    updateSlider();
+    updateDotsBackground();
+    updateDots();
+
+    // if we reach the clone (after last real slide)
+    if (currentIndex === totalSlides - 1) {
+      setTimeout(() => {
+        track.style.transition = "none";
+        currentIndex = 0; // jump to real first slide
+        updateSlider(0);
+        isAnimating = false;
+      }, 400); // match transition duration
+    } else {
+      setTimeout(() => { isAnimating = false; }, 400);
+    }
+  }
+
+  // function prevSlide
+    window.prevSlide = function () {
+    if (isAnimating) return;
+    isAnimating = true;
+
+    currentIndex--;
+
+      // ANALYTICS
+hasTrackedPlay = false;
+      
+    updateSlider();
+    updateDots();
+
+    // if we swipe back before the first slide
+    if (currentIndex < 0) {
+      track.style.transition = "none";
+      currentIndex = totalSlides - 2; // last real slide
+      updateSlider(0);
+      setTimeout(() => { isAnimating = false; }, 0);
+    } else {
+      setTimeout(() => { isAnimating = false; }, 400);
+    }
+  }
+
+  track.addEventListener("touchstart", e => {
+    if (isSwipingBoard) return;
+    startX = e.touches[0].clientX;
+  });
+
+  track.addEventListener("touchend", e => {
+    if (isSwipingBoard) return;
+
+    const endX = e.changedTouches[0].clientX;
+    if (startX - endX > 50) nextSlide();
+    if (endX - startX > 50) prevSlide();
+  });
+}
+
+/* ---------- Render ---------- */
+function renderPuzzles() {
+  const container = document.getElementById("puzzleTrack");
+  container.innerHTML = "";
+
+  PUZZLES.forEach((puzzleData, puzzleIndex) => {
+
+    // THIS IS THE SLIDER SLIDE
+    const slide = document.createElement("div");
+    slide.className = "puzzle-slide"; // must be direct child of #puzzleTrack
+    slide.style.minWidth = "100vw"; // ensure full width
+    slide.style.background = puzzleData.bgcolor || "#829593";
+
+    // THIS IS THE PUZZLE CONTENT
+    const wrapper = document.createElement("div");
+    wrapper.className = "puzzle-wrapper";
+    wrapper.style.background = puzzleData.bgcolor || "#829593";
+
+    const title = document.createElement("div");
+    title.className = "puzzle-title";
+    title.textContent = puzzleData.name || "Puzzle";
+
+    const boardEl = document.createElement("div");
+    boardEl.className = "board";
+
+    // add dots container inside this slide
+   const dotsContainer = document.createElement("div");
+   dotsContainer.className = "paginationDots";
+   dotsContainer.style.background = puzzleData.bgcolor || "#829593"; 
+   wrapper.appendChild(dotsContainer);
+
+    wrapper.appendChild(title);
+    wrapper.appendChild(boardEl);
+
+    // append content wrapper into slide
+    slide.appendChild(wrapper);
+
+    // append slide to track
+    container.appendChild(slide);
+
+    createPuzzleBoard(boardEl, puzzleData.imageurl);
+  });
+}
+
+function createPuzzleBoard(boardEl, imageUrl) {
+
+  let gameStarted = false;
+  let board = [...Array(GRID * GRID).keys()];
+  let lastEmpty = null;
+  let hasWon = false;
+
+  function solvedBoard() {
+  return [...Array(GRID * GRID).keys()].slice(1).concat(0);
+}
+
+  function neighbors(index) {
+    const r = Math.floor(index / GRID);
+    const c = index % GRID;
+    const n = [];
+    if (r > 0) n.push(index - GRID);
+    if (r < GRID - 1) n.push(index + GRID);
+    if (c > 0) n.push(index - 1);
+    if (c < GRID - 1) n.push(index + 1);
+    return n;
+  }
+
+  function isSolved() {
+    const solved = solvedBoard();
+    return board.every((val, index) => val === solved[index]);
+  }
+
+  function shuffleBoard() {
+    let empty = board.length - 1;
+    lastEmpty = null;
+
+    const [minMoves, maxMoves] = EASY_MOVES;
+    const moves = Math.floor(Math.random() * (maxMoves - minMoves + 1)) + minMoves;
+
+    for (let i = 0; i < moves; i++) {
+      const options = neighbors(empty).filter(n => n !== lastEmpty);
+      const move = options[Math.floor(Math.random() * options.length)];
+      [board[empty], board[move]] = [board[move], board[empty]];
+      lastEmpty = empty;
+      empty = move;
+    }
+
+    hasWon = false;
+    gameStarted = true; // THIS is the key fix
+
+    // ANALYTICS
+gameStartTime = Date.now();
+
+if (!hasTrackedPlay) {
+  track("play", {
+    content: CONTENT_NAME
+  });
+  hasTrackedPlay = true;
+}
+    
+   draw();
+ 
+  }
+
+  function moveBySwipe(direction) {
+    const e = board.indexOf(0);
+    const r = Math.floor(e / GRID);
+    const c = e % GRID;
+
+    let target = null;
+    if (direction === "up" && r < GRID - 1) target = e + GRID;
+    if (direction === "down" && r > 0) target = e - GRID;
+    if (direction === "left" && c < GRID - 1) target = e + 1;
+    if (direction === "right" && c > 0) target = e - 1;
+
+    if (target === null) return;
+
+    [board[e], board[target]] = [board[target], board[e]];
+    draw();
+  }
+
+  function draw() {
+    boardEl.innerHTML = "";
+
+    board.forEach((tile, index) => {
+      if (tile === 0) return;
+
+      const el = document.createElement("div");
+      el.className = "tile";
+
+      const r = Math.floor(index / GRID);
+      const c = index % GRID;
+      el.style.transform = `translate(${c * 100}%, ${r * 100}%)`;
+
+      const img = document.createElement("img");
+      const ir = Math.floor((tile - 1) / GRID);
+      const ic = (tile - 1) % GRID;
+
+      img.src = imageUrl;
+      img.style.left = `-${ic * 100}%`;
+      img.style.top = `-${ir * 100}%`;
+
+      el.appendChild(img);
+      boardEl.appendChild(el);
+    });
+
+if (gameStarted && isSolved() && !hasWon) {
+  hasWon = true;
+
+  const tiles = boardEl.querySelectorAll(".tile");
+
+  tiles.forEach((tile, i) => {
+    setTimeout(() => {
+      tile.classList.add("completed");
+      setTimeout(() => tile.classList.remove("completed"), 800);
+    }, i * 50);
+  });
+
+// ANALYTICS
+const timeSpentSeconds = Math.floor(
+  (Date.now() - gameStartTime) / 1000
+);
+
+// Ensure we always reference a real puzzle, even if currentIndex
+// temporarily points to the cloned slide used for looping.
+const realIndex = currentIndex % PUZZLES.length;
+
+track("completed", {
+  content: PUZZLES[realIndex].name,
+  time_spent_seconds: timeSpentSeconds
+});
+  
+  
+  setTimeout(() => {
+    document.getElementById("winOverlay").classList.add("show");
+  }, 600);
+}
+  }
+
+  // Touch handling PER BOARD
+  let startX = 0;
+  let startY = 0;
+
+  boardEl.addEventListener("touchstart", e => {
+  isSwipingBoard = true;
+  e.stopPropagation();
+
+  startX = e.touches[0].clientX;
+  startY = e.touches[0].clientY;
+});
+
+  boardEl.addEventListener("touchend", e => {
+  e.stopPropagation();
+
+  const dx = e.changedTouches[0].clientX - startX;
+  const dy = e.changedTouches[0].clientY - startY;
+
+  if (Math.abs(dx) < 30 && Math.abs(dy) < 30) {
+    isSwipingBoard = false;
+    return;
+  }
+
+  if (Math.abs(dx) > Math.abs(dy)) {
+    moveBySwipe(dx > 0 ? "right" : "left");
+  } else {
+    moveBySwipe(dy > 0 ? "down" : "up");
+  }
+
+  setTimeout(() => {
+    isSwipingBoard = false;
+  }, 50);
+});
+
+  shuffleBoard();
+}
+
+function createDots() {
+  const dotsContainer = document.getElementById("paginationDots");
+  dotsContainer.innerHTML = "";
+  for (let i = 0; i < totalSlides - 1; i++) { // exclude clone
+    const dot = document.createElement("span");
+    dot.classList.add("dot");
+    dotsContainer.appendChild(dot);
+
+    dot.addEventListener("click", () => {
+      currentIndex = i;
+      updateSlider();
+    });
+  }
+  updateDots();
+}
+ 
+function updateDots() {
+  const dots = document.querySelectorAll("#paginationDots .dot");
+  dots.forEach((dot, i) => dot.classList.remove("active-dot"));
+  dots[currentIndex % (totalSlides - 1)].classList.add("active-dot");
+}
+
+function updateDotsBackground() {
+  const dotsContainer = document.getElementById("paginationDots");
+  const slides = document.querySelectorAll(".puzzle-slide");
+
+  if (!slides.length) return;
+
+  const realIndex = currentIndex % (totalSlides - 1);
+  const activeSlide = slides[realIndex];
+
+  const wrapper = activeSlide.querySelector(".puzzle-wrapper");
+  const bgColor = wrapper.style.background;
+
+  dotsContainer.style.background = bgColor;
+}
+
+  
+/* ---------- INIT ---------- */
+async function init() {
+  await fetchPuzzleImage();
+  renderPuzzles();
+
+  // ensure the track has slides before setup
+  const track = document.getElementById("puzzleTrack");
+  totalSlides = track.children.length;
+
+  setupSlider();
+}
+
+init();
+</script>
+
+</body>
+</html>
