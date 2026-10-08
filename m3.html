@@ -29,6 +29,7 @@ body {
 }
 
 .app {
+  position: relative;
   max-width: 420px;
   width: 100%;
   height: 100vh;
@@ -36,6 +37,17 @@ body {
   flex-direction: column;
   box-sizing: border-box;
   padding: 10px;
+}
+
+  .app::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 150px;
+  background: var(--bg-color);
+  z-index: -1;
 }
 
 .header {
